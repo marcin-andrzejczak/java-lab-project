@@ -1,16 +1,17 @@
 package my.labproject;
 
-import my.labproject.database.DatabaseCliController;
-import my.labproject.logger.Logger;
+import my.labproject.application.DatabaseApplication;
+import my.labproject.controllers.LoggerController;
 
 public class Main {
 
+    private final static LoggerController log = Config.Constants.LOGGER;
+
     public static void main(String[] args) {
-	    DatabaseCliController dbCli = new DatabaseCliController();
-        Logger log = new Logger();
+        DatabaseApplication app = new DatabaseApplication();
 
         log.INFO("Starting application");
-	    dbCli.run();
+	    app.run();
 	    log.INFO("Exiting application");
     }
 }
