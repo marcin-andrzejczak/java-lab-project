@@ -41,7 +41,7 @@ public class Statements {
             log.ERROR("Workspace field is empty!");
         }
         String pathname = config.getUsedWorkspace()+databaseName;
-        if( fileControl.exis(pathname) ){
+        if( fileControl.exists(pathname) ){
             config.setUsedDatabase(databaseName);
             log.INFO("Using database \""+databaseName+"\"");
             return true;

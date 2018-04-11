@@ -3,6 +3,7 @@ package my.labproject.controllers;
 import my.labproject.Config;
 
 import java.io.File;
+import java.util.Arrays;
 
 public class FileController {
 
@@ -34,36 +35,28 @@ public class FileController {
         return result ;
     }
 
-    public boolean exis(String dirname){
-        log.DEBUG("CODOKURWY");
-        log.WARN("1");
-        if( dirname.isEmpty() ){
-            log.ERROR("Cannot check existence, directory argument is empty!");
-            return false;
-        }
-        log.DEBUG("KURWA CZEMU TO NIE DZIALA DO CHUJA");
-        log.WARN("2");
-        File file = new File(dirname);
-        log.WARN("3");
+    public boolean exists(String dirname){
         try {
+            if (dirname.isEmpty()) {
+                return false;
+            }
+
+            File file = new File(dirname);
+
             if (file.isDirectory()) {
-                log.DEBUG("Directory \"" + dirname + "\" exists.");
+
                 return true;
             }
-            log.WARN("4");
+            log.DEBUG("CODOKURWYSIETUDZIEJE");
             if (file.exists()) {
-                log.DEBUG("File \"" + dirname + "\" exists.");
+
                 return true;
             }
-            log.WARN("5");
-        } catch ( NullPointerException ex ){
-            //log.ERROR("Null pointer exception occurred!\n"+ex.getMessage());
-        } catch ( Exception ex ) {
-            log.ERROR("Exception occurred!\n"+ex.getMessage());
+        }catch (NullPointerException ex){
+            System.out.println("Exception FOUND: "+ex.getMessage()+"\n"+ex.getCause()+"\n"+ Arrays.toString(ex.getStackTrace()));
         }
-        log.WARN("6");
-        log.ERROR("File/directory existence check failed.");
-        log.WARN("7");
+
+
         return false;
     }
 
@@ -75,7 +68,6 @@ public class FileController {
                 deleteAll(file.getPath());
             }
         }
-        log.DEBUG("Deleting: "+dir.getPath());
         return dir.delete();
     }
 
