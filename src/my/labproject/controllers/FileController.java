@@ -3,6 +3,7 @@ package my.labproject.controllers;
 import my.labproject.Config;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class FileController {
@@ -37,25 +38,20 @@ public class FileController {
 
     public boolean exists(String dirname){
         try {
-            if (dirname.isEmpty()) {
+            if (dirname.isEmpty())
                 return false;
-            }
 
             File file = new File(dirname);
 
-            if (file.isDirectory()) {
-
+            if (file.isDirectory())
                 return true;
-            }
-            log.DEBUG("CODOKURWYSIETUDZIEJE");
-            if (file.exists()) {
 
+            if (file.exists())
                 return true;
-            }
+
         }catch (NullPointerException ex){
-            System.out.println("Exception FOUND: "+ex.getMessage()+"\n"+ex.getCause()+"\n"+ Arrays.toString(ex.getStackTrace()));
+            log.ERROR("Exception FOUND: "+ex.getMessage()+"\n"+ex.getCause()+"\n"+ Arrays.toString(ex.getStackTrace()));
         }
-
 
         return false;
     }
@@ -63,12 +59,27 @@ public class FileController {
     public boolean deleteAll(String path) {
         File dir = new File(path);
         File[] allContents = dir.listFiles();
+
         if (allContents != null) {
             for (File file : allContents) {
                 deleteAll(file.getPath());
             }
         }
+
         return dir.delete();
+    }
+
+    public ArrayList<String> listFiles(String path) {
+        File dir = new File(path);
+        File[] allContents = dir.listFiles();
+        ArrayList<String> fileList = new ArrayList<>();
+
+        if( allContents != null ) {
+            for( File file : allContents ){
+                fileList.add(file.getName());
+            }
+        }
+        return fileList;
     }
 
 

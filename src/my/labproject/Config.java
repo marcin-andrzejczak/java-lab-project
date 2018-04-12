@@ -5,6 +5,8 @@ import my.labproject.controllers.LoggerController;
 
 public class Config {
 
+    private static final Config config = new Config();
+
     /**
      *  CONSTANTS
      */
@@ -13,13 +15,15 @@ public class Config {
 
         public static final FileController FILE_CONTROLLER = new FileController();
 
-        public static final LoggerController LOGGER = new LoggerController(LoggerController.Constants.DEBUG);
+        public static final LoggerController LOGGER = new LoggerController(LoggerController.Constants.ERROR);
 
         public static final String DEFAULT_WORKSPACE = "E:/DB_TEST/labApplication/";
 
-        public static final String PROMPT = "\t-> ";
+        public static final String PROMPT =  "\t-> ";
 
-        public static final Config CHANGEABLE = new Config();
+        public static final int CLI_TRIES_NUMBER = 3;
+
+        public static final Config CHANGEABLE = config;
 
     }
 

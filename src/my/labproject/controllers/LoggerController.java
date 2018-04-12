@@ -26,22 +26,22 @@ public class LoggerController {
     }
 
     public void INFO(String message){
-        if(severity >= Constants.INFO && !message.isEmpty())
+        if(severity >= Constants.INFO && !"".equals(message))
             System.out.println("["+ANSI_BLUE+"INFO"+ANSI_RESET+"] "+message);
     }
 
     public void WARN(String message){
-        if(severity >= Constants.WARN && !message.isEmpty())
+        if(severity >= Constants.WARN && !"".equals(message))
             System.out.println("["+ANSI_YELLOW+"WARN"+ANSI_RESET+"] "+message);
     }
 
     public void ERROR(String message){
-        if(severity >= Constants.ERROR && !message.isEmpty())
+        if(severity >= Constants.ERROR && !"".equals(message))
             System.out.println("["+ANSI_RED+"ERROR"+ANSI_RESET+"] "+message);
     }
 
     public void DEBUG(String message){
-        if(severity >= Constants.DEBUG && !message.isEmpty())
+        if(severity >= Constants.DEBUG && !"".equals(message))
             System.out.println("["+ANSI_GREEN+"DEBUG"+ANSI_RESET+"] "+message);
     }
 

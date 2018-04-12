@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 
 public class CliController {
 
+    private final Config config = Config.Constants.CHANGEABLE;
     private final String prompt = Config.Constants.PROMPT;
     private final LoggerController log = Config.Constants.LOGGER;
 
@@ -25,6 +26,30 @@ public class CliController {
         }
 
         return command;
+    }
+
+    public boolean askYesNo(String question){
+        String answer = "";
+        int triesNumber = Config.Constants.CLI_TRIES_NUMBER;
+
+        do {
+            log.INFO(question);
+            answer = readCommand();
+            String s = answer.toUpperCase();
+            if ("YES".equals(s) || "Y".equals(s)) {
+                return true;
+
+            } else if ("NO".equals(s) || "N".equals(s)) {
+                return false;
+
+            } else {
+                log.INFO("Answer not recognized!");
+            }
+
+        } while( --triesNumber > 0 );
+
+        log.INFO("Could not recognize answer too many times!. Using already existing workspace: "+config.getUsedWorkspace());
+        return false;
     }
 
 }

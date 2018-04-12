@@ -16,18 +16,24 @@ public class DatabaseApplication {
 
     public void run(){
         String command;
+        boolean answer = true;
 
-        if(!db.initialize()){
+        if(db.workspaceExists())
+            answer = cli.askYesNo("Workspace already exists! Create new one? [yes/no]:");
+
+        if( answer && !db.initialize()){
             log.ERROR("Error occurred during initialization. Exiting.");
             return;
         }
 
+        log.INFO("Everything started successfully. You may start working now.");
         do{
             command = cli.readCommand();
-            db.interpret(command);
+            if( !"".equals(command))
+                db.interpret(command);
         } while ( !command.toUpperCase().equals("EXIT") );
 
-        file.deleteAll(config.getUsedWorkspace());
+        //file.deleteAll(config.getUsedWorkspace());
     }
 
 }
