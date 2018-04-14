@@ -48,7 +48,7 @@ public class CliController {
 
         } while( --triesNumber > 0 );
 
-        log.INFO("Could not recognize answer too many times!. Using already existing workspace: "+config.getUsedWorkspace());
+        log.INFO("Could not recognize answer too many times!");
         return false;
     }
 

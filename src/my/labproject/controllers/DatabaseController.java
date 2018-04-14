@@ -4,6 +4,8 @@ import my.labproject.Config;
 import my.labproject.utils.Statements;
 
 import java.beans.Expression;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class DatabaseController {
 
@@ -44,6 +46,9 @@ public class DatabaseController {
     public void interpret(String query) {
         String[] components = query.split(" ");
 
+        // TODO Add checking which function to execute by comparing command with special regex.
+        //      Can be done after implementing all the necessary basic functionality.
+
         String s = components[0].toUpperCase();
         if ("CREATE".equals(s)) switch (components[1].toUpperCase()) {
             case "DATABASE":
@@ -53,7 +58,8 @@ public class DatabaseController {
 
             case "TABLE":
                 log.DEBUG("Trying to create \"" + components[2] + "\" table inside \"" + config.getUsedDatabase() + "\" database.");
-                Statements.Create.table(components[2]);
+                ArrayList<String> params = new ArrayList<String>(Arrays.asList(query.split("(\\(|\\))")[1].split(",")));
+                Statements.Create.table(components[2], params);
                 break;
 
             default:
@@ -71,6 +77,11 @@ public class DatabaseController {
                 Statements.Show.tables();
                 break;
 
+            case "TABLE":
+                log.DEBUG("Trying to show all fields in the table \""+components[2]+"\'.");
+                Statements.Show.table(components[2]);
+                break;
+
         } else if ("USE".equals(s)) {
             log.DEBUG("Trying to use \"" + components[1] + "\" database.");
             Statements.use(components[1]);
@@ -78,6 +89,21 @@ public class DatabaseController {
         } else if ("USING".equals(s)) {
             log.DEBUG("Trying to invoke \"USING\" statement.");
             Statements.using();
+
+        } else if ( "INSERT".equals(s) ) {
+            log.DEBUG("Trying to insert data into table");
+            ArrayList<String> headers = new ArrayList<String>(Arrays.asList(query.split("([()])")[1].split(",")));
+            ArrayList<String> data = new ArrayList<String>(Arrays.asList(query.split("([()])")[3].split(",")));
+            Statements.insert(components[2], headers, data);
+
+        } else if ( "SELECT".equals(s) ) {
+            log.DEBUG("Trying to select data from table");
+
+            String tableName = query.toUpperCase().split("(FROM)")[1].trim();
+            ArrayList<String> headers = new ArrayList<String>(Arrays.asList(query.toUpperCase().split("(SELECT|FROM)")[1].split(",")));
+            Statements.select( tableName, headers );
+
+            // SELECT id, name, tax FROM tabelka
 
         } else if ("EXIT".equals(s)){
             return;
