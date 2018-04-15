@@ -1,22 +1,24 @@
 package my.labproject.controllers;
 
 import my.labproject.Config;
+import my.labproject.Config.Constants;
+import my.labproject.utils.PatternMatcher;
 import my.labproject.utils.Statements;
 
-import java.beans.Expression;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 public class DatabaseController {
 
-    private final Config config = Config.Constants.CHANGEABLE;
-    private final LoggerController log = Config.Constants.LOGGER;
-    private final FileController fileControl = Config.Constants.FILE_CONTROLLER;
-    private String workspace = Config.Constants.DEFAULT_WORKSPACE;
+    private final Config config = Constants.CHANGEABLE;
+    private final LoggerController log = Constants.LOGGER;
+    private final FileController fileControl = Constants.FILE_CONTROLLER;
+    private final PatternMatcher patternMatcher = new PatternMatcher();
+    private String workspace = Constants.DEFAULT_WORKSPACE;
 
 
     public DatabaseController(){
-        this(Config.Constants.DEFAULT_WORKSPACE);
+        this(Constants.DEFAULT_WORKSPACE);
     }
 
     public DatabaseController(String workspace){
@@ -44,11 +46,17 @@ public class DatabaseController {
     }
 
     public void interpret(String query) {
-        String[] components = query.split(" ");
-
         // TODO Add checking which function to execute by comparing command with special regex.
         //      Can be done after implementing all the necessary basic functionality.
+        if( !patternMatcher.matchesAnyAvailable(query.toUpperCase()) ){
+            log.ERROR("Syntax error! Command could not be interpreted!");
+            return;
+        }
 
+        if( query.lastIndexOf(";") == query.length()-1 )
+            query = query.substring(0, query.length()-1);
+
+        String[] components = query.split(" ");
         String s = components[0].toUpperCase();
         if ("CREATE".equals(s)) switch (components[1].toUpperCase()) {
             case "DATABASE":
@@ -58,12 +66,8 @@ public class DatabaseController {
 
             case "TABLE":
                 log.DEBUG("Trying to create \"" + components[2] + "\" table inside \"" + config.getUsedDatabase() + "\" database.");
-                ArrayList<String> params = new ArrayList<String>(Arrays.asList(query.split("(\\(|\\))")[1].split(",")));
+                ArrayList<String> params = new ArrayList<String>(Arrays.asList(query.split("([()])")[1].split(",")));
                 Statements.Create.table(components[2], params);
-                break;
-
-            default:
-                log.ERROR("Syntax error! Usage: CREATE {DATABASE|TABLE} name");
                 break;
 
         } else if ("SHOW".equals(s)) switch (components[1].toUpperCase()) {
@@ -98,18 +102,24 @@ public class DatabaseController {
 
         } else if ( "SELECT".equals(s) ) {
             log.DEBUG("Trying to select data from table");
-
-            String tableName = query.toUpperCase().split("(FROM)")[1].trim();
+            String tableName = query.toUpperCase().split("(FROM|WHERE)")[1].trim();
             ArrayList<String> headers = new ArrayList<String>(Arrays.asList(query.toUpperCase().split("(SELECT|FROM)")[1].split(",")));
-            Statements.select( tableName, headers );
+            Statements.select( tableName, headers, query);
 
-            // SELECT id, name, tax FROM tabelka
+        } else if ("UPDATE".equals(s)){
+            log.DEBUG("Trying to update data in the table");
+            Statements.update(query);
+            return;
+
+        } else if ("DELETE".equals(s)){
+            log.DEBUG("Under construction!");
+            return;
 
         } else if ("EXIT".equals(s)){
             return;
 
         } else {
-            log.ERROR("Syntax error! Command:\n" + components[0] + "\nCould not be interpreted!");
+            log.ERROR("Syntax error! Command could not be interpreted!");
         }
 
     }

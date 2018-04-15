@@ -4,7 +4,6 @@ import my.labproject.Config;
 import my.labproject.controllers.FileController;
 import my.labproject.controllers.LoggerController;
 
-import javax.print.attribute.HashPrintJobAttributeSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -18,6 +17,7 @@ public class Statements {
     private static final Config config = Config.Constants.CHANGEABLE;
     private static final LoggerController log = Config.Constants.LOGGER;
     private static final FileController fileControl = Config.Constants.FILE_CONTROLLER;
+    private static final PatternMatcher patternMatcher = Config.Constants.PATTERN_MATCHER;
 
     public static class Create{
 
@@ -82,9 +82,9 @@ public class Statements {
                 return true;
             }
 
-            StringBuilder sb = new StringBuilder("Table\n");
+            StringBuilder sb = new StringBuilder("Tables:\n");
             for(String table : tables){
-                sb.append("       ").append(table).append("\n");
+                sb.append("       ").append(table.substring(0, table.lastIndexOf(".txt"))).append("\n");
             }
 
             log.INFO(sb.toString());
@@ -135,7 +135,7 @@ public class Statements {
         return true;
     }
 
-    public static boolean select(String tableName, ArrayList<String> headersToGet){
+    public static boolean select(String tableName, ArrayList<String> headersToGet, String query){
         String path = config.getUsedWorkspace()+config.getUsedDatabase()+"/"+tableName+".txt";
         ArrayList<String> tableHeaders = fileControl.readHeader(path);
         ArrayList<String> tempTableHeaders = new ArrayList<String>(tableHeaders);
@@ -158,12 +158,27 @@ public class Statements {
             }
         }
 
+        log.DEBUG(tableName);
+        log.DEBUG(headersToGet.toString());
         for( String header : headersToGet){
             sb.append(header).append(Config.Constants.SELECT_DATA_SEPARATOR);
         }
         sb.delete(sb.lastIndexOf(Config.Constants.SELECT_DATA_SEPARATOR), sb.length()).append("\n       ");
 
-        ArrayList<HashMap<String, String>> data = fileControl.readData(path, headersToGet);
+        ArrayList<HashMap<String, String>> data;
+        log.DEBUG(query);
+        if(query.toUpperCase().matches("^SELECT (\\*|\\s?\\w+( ?, ?\\w+)*) FROM \\w+ WHERE \\w+ ?(>|>=|==|<=|<|!=) ?.+;?$")) {
+            log.DEBUG("Entering where clause");
+            String conditionPart = query.split("WHERE|where")[1];
+            String headerWhere = conditionPart.trim().split("(>|>=|==|<=|<|!=)")[0].trim();
+            String operator = patternMatcher.retrieve("(>|>=|==|<=|<|!=)", conditionPart);
+            String value = conditionPart.trim().split("(>|>=|==|<=|<|!=)")[1].trim();
+
+            data = where(fileControl.readData(path), headerWhere, operator, value);
+        } else {
+            data = fileControl.readData(path, headersToGet);
+        }
+        //ArrayList<HashMap<String, String>> data = fileControl.readData(path, headersToGet);
         for( HashMap fields : data ){
             for( String header : headersToGet ){
                 sb.append(fields.get(header)).append(Config.Constants.SELECT_DATA_SEPARATOR);
@@ -201,14 +216,75 @@ public class Statements {
         return true;
     }
 
-    public static boolean update(){
+    // TODO absolutely not working, just selecting with where clause right now ( served a purpose as a playground )
+    public static boolean update(String query){
+        String tableName = query.split(" ")[1];
+        String path = config.getUsedWorkspace()+config.getUsedDatabase()+"/"+tableName+".txt";
+
+        // Right now only testing WHERE clause using one condition
+        String conditionPart = query.split("WHERE|where")[1];
+        String header = conditionPart.trim().split("(>|>=|==|<=|<|!=)")[0].trim();
+        String operator = patternMatcher.retrieve("(>|>=|==|<=|<|!=)", conditionPart);
+        String value = conditionPart.trim().split("(>|>=|==|<=|<|!=)")[1].trim();
+
+        ArrayList<HashMap<String, String>> data = where(fileControl.readData(path), header, operator, value);
+
+        for(HashMap<String, String> d : data){
+            log.DEBUG(d.values().toString());
+        }
+
+//        ArrayList<String> headers = new ArrayList<String>(Arrays.asList(query.split("([()])")[1].split(",")));
+//        ArrayList<String> data = new ArrayList<String>(Arrays.asList(query.split("([()])")[3].split(",")));
 
         return true;
     }
 
+//    UPDATE table_name
+//    SET column1 = value1, column2 = value2, ...
+//    WHERE condition;
+
+    // TODO deleting lines with where
     public static boolean delete(){
 
         return true;
+    }
+
+
+    // Helper functions
+
+    private static ArrayList<HashMap<String, String>> where(ArrayList<HashMap<String, String>> allData, String header, String operator, String value){
+        ArrayList<HashMap<String, String>> result = new ArrayList<>();
+
+        for( HashMap<String, String> data : allData){
+            boolean isNumeric;
+            Integer number = null;
+            try{
+                number = Integer.parseInt(data.get(header));
+                isNumeric = true;
+            } catch( Exception ex ){
+                isNumeric = false;
+            }
+
+            if( (">".equals(operator) || ">=".equals(operator)) && isNumeric ){
+                // TODO
+            }
+            if( ">=".equals(operator) || "==".equals(operator) || "<=".equals(operator) ){
+                if( data.get(header).equals(value) ) {
+                    result.add(data);
+                    continue;
+                }
+            }
+            if( "<=".equals(operator) || "<".equals(operator) ){
+                // TODO
+            }
+            if( "!=".equals(operator) ){
+                if( !data.get(header).equals(value) ) {
+                    result.add(data);
+                }
+            }
+        }
+
+        return result;
     }
 
 }

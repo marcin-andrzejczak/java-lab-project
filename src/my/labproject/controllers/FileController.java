@@ -178,7 +178,9 @@ public class FileController {
         return data;
     }
 
-    public boolean deleteLines(String path, HashMap<String, String> conditions){
+
+    // TODO whole machanism of deleting lines
+    public boolean deleteLines(String path, String header, String operator, String value){
         try {
             BufferedReader file = new BufferedReader(new FileReader(path));
             StringBuffer inputBuffer = new StringBuffer();
