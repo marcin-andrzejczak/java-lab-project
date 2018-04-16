@@ -5,7 +5,6 @@ import my.labproject.controllers.FileController;
 import my.labproject.controllers.LoggerController;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 
 /**
@@ -35,10 +34,11 @@ public class Statements {
         }
 
         public static boolean table(String name, ArrayList<String> params){
+
             String path = config.getUsedWorkspace()+config.getUsedDatabase()+"/"+name+".txt";
 
             log.DEBUG("Creating table \""+name+"\" with path \""+path+"\".");
-            if(fileControl.create(path, "f")
+            if( config.getUsedDatabase() != null && fileControl.create(path, "f")
                 && fileControl.saveLineToFile(path, params)) {
                 log.INFO("Successfully created table \""+name+"\"");
                 return true;
@@ -136,7 +136,13 @@ public class Statements {
     }
 
     public static boolean select(String tableName, ArrayList<String> headersToGet, String query){
+        // TODO check if table exists
         String path = config.getUsedWorkspace()+config.getUsedDatabase()+"/"+tableName+".txt";
+        if( !fileControl.exists(path) ) {
+            log.ERROR("Could not select data from table \""+tableName+"\", because it does not exist!");
+            return false;
+        }
+
         ArrayList<String> tableHeaders = fileControl.readHeader(path);
         ArrayList<String> tempTableHeaders = new ArrayList<String>(tableHeaders);
         StringBuilder sb = new StringBuilder();
@@ -218,6 +224,7 @@ public class Statements {
 
     // TODO absolutely not working, just selecting with where clause right now ( served a purpose as a playground )
     public static boolean update(String query){
+        // TODO check if table exists
         String tableName = query.split(" ")[1];
         String path = config.getUsedWorkspace()+config.getUsedDatabase()+"/"+tableName+".txt";
 
@@ -239,9 +246,7 @@ public class Statements {
         return true;
     }
 
-//    UPDATE table_name
-//    SET column1 = value1, column2 = value2, ...
-//    WHERE condition;
+
 
     // TODO deleting lines with where
     public static boolean delete(){
