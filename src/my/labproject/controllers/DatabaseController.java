@@ -51,6 +51,11 @@ public class DatabaseController {
         if( !patternMatcher.matchesAnyAvailable(query.toUpperCase()) ){
             log.ERROR("Syntax error! Command could not be interpreted!");
             return;
+        } else if( config.getUsedDatabase() == null || config.getUsedWorkspace() == null ) {
+            log.ERROR("Wrong environment settings detected. ");
+            log.ERROR("Used database:  "+config.getUsedDatabase());
+            log.ERROR("Used workspace: "+config.getUsedWorkspace());
+            return;
         }
 
         if( query.lastIndexOf(";") == query.length()-1 )
@@ -65,9 +70,12 @@ public class DatabaseController {
                 break;
 
             case "TABLE":
-                log.DEBUG("Trying to create \"" + components[2] + "\" table inside \"" + config.getUsedDatabase() + "\" database.");
+                String tName = components[2];
+                if( tName.contains("(") )
+                    tName = tName.substring(0, tName.lastIndexOf("("));
+                log.DEBUG("Trying to create \"" + tName + "\" table inside \"" + config.getUsedDatabase() + "\" database.");
                 ArrayList<String> params = new ArrayList<String>(Arrays.asList(query.split("([()])")[1].split(",")));
-                Statements.Create.table(components[2], params);
+                Statements.Create.table(tName, params);
                 break;
 
         } else if ("SHOW".equals(s)) switch (components[1].toUpperCase()) {
@@ -108,6 +116,7 @@ public class DatabaseController {
 
         } else if ("UPDATE".equals(s)){
             log.DEBUG("Trying to update data in the table");
+            log.WARN("Functionality still under construction");
             Statements.update(query);
             return;
 
