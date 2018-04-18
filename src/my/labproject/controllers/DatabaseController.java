@@ -10,10 +10,11 @@ import java.util.Arrays;
 
 public class DatabaseController {
 
-    private final Config config = Constants.CHANGEABLE;
-    private final LoggerController log = Constants.LOGGER;
-    private final FileController fileControl = Constants.FILE_CONTROLLER;
+    private final Config config = new Config();
+    private final LoggerController log = new LoggerController(LoggerController.Constants.DEBUG);
+    private final FileController fileControl = new FileController();
     private final PatternMatcher patternMatcher = new PatternMatcher();
+    private final Statements statements = new Statements();
     private String workspace = Constants.DEFAULT_WORKSPACE;
 
 
@@ -65,7 +66,7 @@ public class DatabaseController {
         if ("CREATE".equals(s)) switch (components[1].toUpperCase()) {
             case "DATABASE":
                 log.DEBUG("Trying to create \"" + components[2] + "\" database.");
-                Statements.Create.database(components[2]);
+                statements.createDatabase(components[2]);
                 break;
 
             case "TABLE":
@@ -74,53 +75,53 @@ public class DatabaseController {
                     tName = tName.substring(0, tName.lastIndexOf("("));
                 log.DEBUG("Trying to create \"" + tName + "\" table inside \"" + config.getUsedDatabase() + "\" database.");
                 ArrayList<String> params = new ArrayList<String>(Arrays.asList(query.split("([()])")[1].split(",")));
-                Statements.Create.table(tName, params);
+                statements.createTable(tName, params);
                 break;
 
         } else if ("SHOW".equals(s)) switch (components[1].toUpperCase()) {
             case "DATABASES":
                 log.DEBUG("Trying to show all databases.");
-                Statements.Show.databases();
+                statements.showDatabases();
                 break;
 
             case "TABLES":
                 log.DEBUG("Trying to show all tables in database \""+config.getUsedDatabase()+"\'.");
-                Statements.Show.tables();
+                statements.showTables();
                 break;
 
             case "TABLE":
                 log.DEBUG("Trying to show all fields in the table \""+components[2]+"\'.");
-                Statements.Show.table(components[2]);
+                statements.showTable(components[2]);
                 break;
 
         } else if ("USE".equals(s)) {
             log.DEBUG("Trying to use \"" + components[1] + "\" database.");
-            Statements.use(components[1]);
+            statements.use(components[1]);
 
         } else if ("USING".equals(s)) {
             log.DEBUG("Trying to invoke \"USING\" statement.");
-            Statements.using();
+            statements.using();
 
         } else if ( "INSERT".equals(s) ) {
             log.DEBUG("Trying to insert data into table");
             ArrayList<String> headers = new ArrayList<String>(Arrays.asList(query.split("([()])")[1].split(",")));
             ArrayList<String> data = new ArrayList<String>(Arrays.asList(query.split("([()])")[3].split(",")));
-            Statements.insert(components[2], headers, data);
+            statements.insert(components[2], headers, data);
 
         } else if ( "SELECT".equals(s) ) {
             log.DEBUG("Trying to select data from table");
             String tableName = query.toUpperCase().split("(FROM|WHERE)")[1].trim();
             ArrayList<String> headers = new ArrayList<String>(Arrays.asList(query.toUpperCase().split("(SELECT|FROM)")[1].split(",")));
-            Statements.select( tableName, headers, query);
+            statements.select( tableName, headers, query);
 
         } else if ("UPDATE".equals(s)){
             log.DEBUG("Trying to update data in the table");
             log.WARN("Functionality still under construction");
-            Statements.update(query);
+            statements.update(query);
 
         } else if ("DELETE".equals(s)){
             log.DEBUG("Under construction!");
-            Statements.delete(query);
+            statements.delete(query);
         } else {
             log.ERROR("Syntax error! Command could not be interpreted!");
         }

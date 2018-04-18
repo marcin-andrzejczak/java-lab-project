@@ -2,27 +2,28 @@ package my.labproject.controllers;
 
 public class LoggerController {
 
-    private static int severity = Constants.NOTSET;
     private final String ANSI_RESET = "\u001B[0m";
     private final String ANSI_RED = "\u001B[31m";
     private final String ANSI_GREEN = "\u001B[32m";
     private final String ANSI_YELLOW = "\u001B[33m";
     private final String ANSI_BLUE = "\u001B[34m";
 
+    private int severity;
+
     public LoggerController(){
-        this( severity != Constants.NOTSET ? Constants.DISABLED : severity );
+        this( Constants.DISABLED );
     }
 
     public LoggerController(int severity){
-        LoggerController.severity = severity;
+        this.severity = severity;
     }
 
-    public static int getSeverity() {
+    public int getSeverity() {
         return severity;
     }
 
-    public static void setSeverity(int severity) {
-        LoggerController.severity = severity;
+    public void setSeverity(int severity) {
+        this.severity = severity;
     }
 
     public void INFO(String message){
@@ -46,7 +47,6 @@ public class LoggerController {
     }
 
     public static class Constants{
-        static final int NOTSET = -1;
         public static final int DISABLED = 0;
         public static final int INFO = 1;
         public static final int WARN = 2;

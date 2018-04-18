@@ -1,6 +1,5 @@
 package my.labproject.utils;
 
-import my.labproject.Config;
 import my.labproject.Config.StatementPatterns;
 import my.labproject.controllers.LoggerController;
 
@@ -12,7 +11,7 @@ import java.util.regex.Pattern;
 
 public class PatternMatcher {
 
-    private final LoggerController log = Config.Constants.LOGGER;
+    private final LoggerController log = new LoggerController(LoggerController.Constants.DEBUG);
 
     public boolean match(Pattern pattern, String query){
         Matcher m = pattern.matcher(query);

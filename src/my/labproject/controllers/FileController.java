@@ -9,7 +9,8 @@ import java.util.HashMap;
 
 public class FileController {
 
-    private static final LoggerController log = Config.Constants.LOGGER;
+    private final Config config = new Config();
+    private final LoggerController log = new LoggerController(LoggerController.Constants.DEBUG);
 
     public boolean create(String pathname, String mode){
         Boolean result = false;

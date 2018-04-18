@@ -14,105 +14,98 @@ import java.util.HashMap;
 
 public class Statements {
 
-    private static final Config config = Config.Constants.CHANGEABLE;
-    private static final LoggerController log = Config.Constants.LOGGER;
-    private static final FileController fileControl = Config.Constants.FILE_CONTROLLER;
-    private static final PatternMatcher patternMatcher = Config.Constants.PATTERN_MATCHER;
+    private static final Config config = new Config();
+    private static final LoggerController log = new LoggerController(LoggerController.Constants.DEBUG);
+    private static final FileController fileControl = new FileController();
+    private static final PatternMatcher patternMatcher = new PatternMatcher();
 
-    public static class Create{
+    public boolean createDatabase(String name){
+        String path = config.getUsedWorkspace()+name;
 
-        public static boolean database(String name){
-            String path = config.getUsedWorkspace()+name;
-
-            log.DEBUG("Creating database \""+name+"\" with path \""+path+"\".");
-            if(fileControl.create(path, "d")) {
-                log.INFO("Successfully created database \""+name+"\"");
-                return true;
-            } else {
-                log.ERROR("Could not create database \""+name+"\"!");
-            }
-            return false;
+        log.DEBUG("Creating database \""+name+"\" with path \""+path+"\".");
+        if(fileControl.create(path, "d")) {
+            log.INFO("Successfully created database \""+name+"\"");
+            return true;
+        } else {
+            log.ERROR("Could not create database \""+name+"\"!");
         }
-
-        public static boolean table(String name, ArrayList<String> params){
-
-            String path = config.getUsedWorkspace()+config.getUsedDatabase()+"/"+name+".txt";
-
-            log.DEBUG("Creating table \""+name+"\" with path \""+path+"\".");
-            if( config.getUsedDatabase() != null && fileControl.create(path, "f")
-                && fileControl.saveLineToFile(path, params)) {
-                log.INFO("Successfully created table \""+name+"\"");
-                return true;
-            } else {
-                log.ERROR("Could not create table \""+name+"\"!");
-            }
-            return false;
-        }
-
+        return false;
     }
 
-    public static class Show{
+    public boolean createTable(String name, ArrayList<String> params){
 
-        public static boolean databases(){
-            String path = config.getUsedWorkspace();
-            ArrayList<String> databases = fileControl.listFiles(path);
+        String path = config.getUsedWorkspace()+config.getUsedDatabase()+"/"+name+".txt";
 
-            if( databases.size() == 0 ){
-                log.INFO("No databases in workspace \""+config.getUsedWorkspace()+"\"");
-                return true;
-            }
+        log.DEBUG("Creating table \""+name+"\" with path \""+path+"\".");
+        if( config.getUsedDatabase() != null && fileControl.create(path, "f")
+            && fileControl.saveLineToFile(path, params)) {
+            log.INFO("Successfully created table \""+name+"\"");
+            return true;
+        } else {
+            log.ERROR("Could not create table \""+name+"\"!");
+        }
+        return false;
+    }
 
-            StringBuilder sb = new StringBuilder("Databases:\n");
-            for(String database : databases){
-                if(database.equals(config.getUsedDatabase()))
-                    sb.append("     * ").append(database).append("\n");
-                else
-                    sb.append("       ").append(database).append("\n");
-            }
+    public boolean showDatabases(){
+        String path = config.getUsedWorkspace();
+        ArrayList<String> databases = fileControl.listFiles(path);
 
-            log.INFO(sb.toString());
+        if( databases.size() == 0 ){
+            log.INFO("No databases in workspace \""+config.getUsedWorkspace()+"\"");
             return true;
         }
 
-        public static boolean tables(){
-            String path = config.getUsedWorkspace()+"/"+config.getUsedDatabase();
-            ArrayList<String> tables = fileControl.listFiles(path);
-
-            if( tables.size() == 0 ){
-                log.INFO("No tables in database \""+config.getUsedDatabase()+"\"");
-                return true;
-            }
-
-            StringBuilder sb = new StringBuilder("Tables:\n");
-            for(String table : tables){
-                sb.append("       ").append(table.substring(0, table.lastIndexOf(".txt"))).append("\n");
-            }
-
-            log.INFO(sb.toString());
-            return true;
-        }
-
-        public static boolean table(String tableName){
-            String path = config.getUsedWorkspace()+"/"+config.getUsedDatabase()+"/"+tableName+".txt";
-            ArrayList<String> fields =  fileControl.readHeader(path);
-
-            if( fields.size() == 0 ){
-                log.INFO("No fields in table \""+tableName+"\"");
-                return true;
-            }
-
-            StringBuilder sb = new StringBuilder("Fields:\n");
-            for(String database : fields){
+        StringBuilder sb = new StringBuilder("Databases:\n");
+        for(String database : databases){
+            if(database.equals(config.getUsedDatabase()))
+                sb.append("     * ").append(database).append("\n");
+            else
                 sb.append("       ").append(database).append("\n");
-            }
+        }
 
-            log.INFO(sb.toString());
+        log.INFO(sb.toString());
+        return true;
+    }
+
+    public boolean showTables(){
+        String path = config.getUsedWorkspace()+"/"+config.getUsedDatabase();
+        ArrayList<String> tables = fileControl.listFiles(path);
+
+        if( tables.size() == 0 ){
+            log.INFO("No tables in database \""+config.getUsedDatabase()+"\"");
             return true;
         }
 
+        StringBuilder sb = new StringBuilder("Tables:\n");
+        for(String table : tables){
+            sb.append("       ").append(table.substring(0, table.lastIndexOf(".txt"))).append("\n");
+        }
+
+        log.INFO(sb.toString());
+        return true;
     }
 
-    public static boolean use(String databaseName){
+    public boolean showTable(String tableName){
+        String path = config.getUsedWorkspace()+"/"+config.getUsedDatabase()+"/"+tableName+".txt";
+        ArrayList<String> fields =  fileControl.readHeader(path);
+
+        if( fields.size() == 0 ){
+            log.INFO("No fields in table \""+tableName+"\"");
+            return true;
+        }
+
+        StringBuilder sb = new StringBuilder("Fields:\n");
+        for(String database : fields){
+            sb.append("       ").append(database).append("\n");
+        }
+
+        log.INFO(sb.toString());
+        return true;
+    }
+
+
+    public boolean use(String databaseName){
         if(config.getUsedWorkspace().isEmpty()){
             log.ERROR("Workspace field is empty!");
         } else {
@@ -131,12 +124,12 @@ public class Statements {
         return false;
     }
 
-    public static boolean using(){
+    public boolean using(){
         log.INFO("Currently use: \""+config.getUsedDatabase()+"\" database and \""+config.getUsedWorkspace()+"\" workspace.");
         return true;
     }
 
-    public static boolean select(String tableName, ArrayList<String> headersToGet, String query){
+    public boolean select(String tableName, ArrayList<String> headersToGet, String query){
         // TODO check if table exists
         String path = config.getUsedWorkspace()+config.getUsedDatabase()+"/"+tableName+".txt";
         if( !fileControl.exists(path) ) {
@@ -197,7 +190,7 @@ public class Statements {
         return true;
     }
 
-    public static boolean insert(String tableName, ArrayList<String> headers, ArrayList<String> data){
+    public boolean insert(String tableName, ArrayList<String> headers, ArrayList<String> data){
         String path = config.getUsedWorkspace()+config.getUsedDatabase()+"/"+tableName+".txt";
 
         if( !fileControl.exists(path)){
@@ -223,7 +216,7 @@ public class Statements {
         return true;
     }
 
-    public static boolean update(String query){
+    public boolean update(String query){
         String tableName = query.split("(update|set)")[1].trim();
         log.WARN(tableName);
 
@@ -263,10 +256,7 @@ public class Statements {
         return true;
     }
 
-
-
-    // TODO deleting lines with where
-    public static boolean delete(String query){
+    public boolean delete(String query){
         String tableName = query.split("(from|where)")[1].trim();
         log.WARN(tableName);
 

@@ -5,7 +5,7 @@ import my.labproject.controllers.LoggerController;
 
 public class Main {
 
-    private final static LoggerController log = Config.Constants.LOGGER;
+    private final static LoggerController log = new LoggerController(LoggerController.Constants.DEBUG);
 
     public static void main(String[] args) {
         DatabaseApplication app = new DatabaseApplication();

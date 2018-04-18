@@ -1,14 +1,28 @@
 package my.labproject;
 
-import my.labproject.controllers.FileController;
-import my.labproject.controllers.LoggerController;
-import my.labproject.utils.PatternMatcher;
-
 import java.util.regex.Pattern;
 
 public class Config {
 
-    private static final Config config = new Config();
+    private static String usedWorkspace;
+
+    private static String usedDatabase;
+
+    public String getUsedWorkspace() {
+        return usedWorkspace;
+    }
+
+    public void setUsedWorkspace(String workspace) {
+        usedWorkspace = workspace;
+    }
+
+    public String getUsedDatabase() {
+        return usedDatabase;
+    }
+
+    public void setUsedDatabase(String database) {
+        usedDatabase = database;
+    }
 
     /**
      *  CONSTANTS
@@ -16,19 +30,11 @@ public class Config {
 
     public static class Constants {
 
-        public static final FileController FILE_CONTROLLER = new FileController();
-
-        public static final PatternMatcher PATTERN_MATCHER = new PatternMatcher();
-
-        public static final LoggerController LOGGER = new LoggerController(LoggerController.Constants.DEBUG);
-
         public static final String DEFAULT_WORKSPACE = "E:/DB_TEST/labApplication/";
 
         public static final String PROMPT =  "\t-> ";
 
         public static final int CLI_TRIES_NUMBER = 3;
-
-        public static final Config CHANGEABLE = config;
 
         public static final String DATA_DELIMITER = ";";
 
@@ -36,7 +42,6 @@ public class Config {
 
     }
 
-    // TODO work out the patterns for statements
     public static class StatementPatterns {
 
         public static final Pattern Create          = Pattern.compile("^CREATE (DATABASE \\w+|TABLE \\w+ ?\\( ?\\w+( ?, ?\\w+)*\\));$");
@@ -59,27 +64,4 @@ public class Config {
 
     }
 
-    /**
-     *  CHANGEABLE
-     */
-
-    private static String USED_WORKSPACE;
-
-    private static String USED_DATABASE;
-
-    public String getUsedWorkspace() {
-        return USED_WORKSPACE;
-    }
-
-    public void setUsedWorkspace(String usedWorkspace) {
-        USED_WORKSPACE = usedWorkspace;
-    }
-
-    public String getUsedDatabase() {
-        return USED_DATABASE;
-    }
-
-    public void setUsedDatabase(String usedDatabase) {
-        USED_DATABASE = usedDatabase;
-    }
 }

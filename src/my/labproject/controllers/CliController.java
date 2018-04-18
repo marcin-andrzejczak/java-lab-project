@@ -1,6 +1,7 @@
 package my.labproject.controllers;
 
 import my.labproject.Config;
+import my.labproject.Config.Constants;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -8,17 +9,18 @@ import java.io.InputStreamReader;
 
 public class CliController {
 
-    private final Config config = Config.Constants.CHANGEABLE;
-    private final String prompt = Config.Constants.PROMPT;
-    private final LoggerController log = Config.Constants.LOGGER;
+    private final Config config = new Config();
+    private final LoggerController log = new LoggerController(LoggerController.Constants.DEBUG);
+    private final String prompt = Constants.PROMPT;
 
     public String readCommand(){
         InputStreamReader input = new InputStreamReader(System.in);
         BufferedReader reader = new BufferedReader(input);
+        String usedDb = config.getUsedDatabase();
         String command = "";
 
         try {
-            System.out.print(this.prompt);
+            System.out.print( !( "".equals(usedDb) || usedDb == null) ? "("+usedDb+")" : this.prompt);
             command = reader.readLine();
             log.DEBUG("Entered command: "+command);
         } catch (IOException ex) {
@@ -29,8 +31,8 @@ public class CliController {
     }
 
     public boolean askYesNo(String question){
-        String answer = "";
-        int triesNumber = Config.Constants.CLI_TRIES_NUMBER;
+        String answer;
+        int triesNumber = Constants.CLI_TRIES_NUMBER;
 
         do {
             log.INFO(question);
