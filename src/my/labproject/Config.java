@@ -51,15 +51,11 @@ public class Config {
 
         public static final Pattern Insert          = Pattern.compile("^INSERT INTO \\w+( ?\\( ?\\w+( ?, ?\\w+)*\\))? VALUES \\( ?\\w+( ?, ?\\w+ ?)*\\);$");
 
-        // TODO after creating the method for it (just for the sake of easier testing
-        public static final Pattern Update          = Pattern.compile("^UPDATE .*$");
+        public static final Pattern Update          = Pattern.compile("^UPDATE \\w+ SET \\w+ ?= ?\\w+( ?, ?\\w+ ?= ?\\w+)* WHERE \\w+ ?==?\\w+;$");
 
-//        public static final Pattern Delete          = Pattern.compile("");
+        public static final Pattern Delete          = Pattern.compile("^DELETE FROM \\w+ WHERE \\w+ ?==?\\w+;$");
 
         public static final Pattern Exit            = Pattern.compile("^EXIT;?$");
-//    UPDATE table_name
-//    SET column1 = value1, column2 = value2, ...
-//    WHERE condition;
 
     }
 

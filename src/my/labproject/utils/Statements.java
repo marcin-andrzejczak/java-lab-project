@@ -223,7 +223,6 @@ public class Statements {
         return true;
     }
 
-    // TODO absolutely not working, just selecting with where clause right now ( served a purpose as a playground )
     public static boolean update(String query){
         String tableName = query.split("(update|set)")[1].trim();
         log.WARN(tableName);
@@ -247,47 +246,55 @@ public class Statements {
         String operator = patternMatcher.retrieve("(>|>=|==|<=|<|!=)", conditionPart);
         String value = conditionPart.trim().split("(>|>=|==|<=|<|!=)")[1].trim();
 
-        if( "".equals(headerWhere) || "".equals(operator) || "".equals(value) )
-            return false;
-
         ArrayList<String> headers = fileControl.readHeader(path);
         ArrayList<HashMap<String, String>> data = fileControl.readData(path);
 
-
-        ArrayList<HashMap<String, String>> result;
-        for(HashMap<String, String> row : data){
-            //row.put();
+        if( "".equals(headerWhere) || "".equals(operator) || "".equals(value) || headers == null || data == null) {
+            return false;
         }
 
-        log.INFO(data.toString());
+        for( HashMap<String, String> row : data )
+            if( row.containsKey(headerWhere) && fulfillsCondition(row.get(headerWhere), operator, value) )
+                for (String key : setMap.keySet())
+                    row.put(key, setMap.get(key));
+
+        fileControl.insertAllData(path, data, headers);
 
         return true;
-//        String headerWhere = conditionPart.trim().split("(>|>=|==|<=|<|!=)")[0].trim();
-
-//        String path = config.getUsedWorkspace()+config.getUsedDatabase()+"/"+tableName+".txt";
-//
-//
-//
-//        if( !fileControl.exists(path) ){
-//            log.ERROR("Table does not exist");
-//            return false;
-//        }
-//
-//        ArrayList<String> headers = fileControl.readHeader(config.getUsedWorkspace()+config.getUsedDatabase()+"/hehe.txt");
-//        ArrayList<HashMap<String, String>> data = fileControl.readData(config.getUsedWorkspace()+config.getUsedDatabase()+"/hehe.txt");
-//
-//
-//
-//        fileControl.insertAllData(config.getUsedWorkspace()+config.getUsedDatabase()+"/test.txt", data, headers);
-//
-//        return true;
     }
 
 
 
     // TODO deleting lines with where
-    public static boolean delete(){
+    public static boolean delete(String query){
+        String tableName = query.split("(from|where)")[1].trim();
+        log.WARN(tableName);
 
+        String path = config.getUsedWorkspace()+config.getUsedDatabase()+"/"+tableName+".txt";
+        if( !fileControl.exists(path) ){
+            log.ERROR("Table does not exist");
+            return false;
+        }
+
+        String conditionPart = query.split("WHERE|where")[1];
+        String headerWhere = conditionPart.trim().split("(>|>=|==|<=|<|!=)")[0].trim();
+        String operator = patternMatcher.retrieve("(>|>=|==|<=|<|!=)", conditionPart);
+        String value = conditionPart.trim().split("(>|>=|==|<=|<|!=)")[1].trim();
+
+        ArrayList<String> headers = fileControl.readHeader(path);
+        ArrayList<HashMap<String, String>> data = fileControl.readData(path);
+
+        if( "".equals(headerWhere) || "".equals(operator) || "".equals(value) || headers == null || data == null) {
+            return false;
+        }
+
+        ArrayList<HashMap<String, String>> toDelete = new ArrayList<>();
+        for( HashMap<String, String> row : data )
+            if( row.containsKey(headerWhere) && fulfillsCondition(row.get(headerWhere), operator, value) )
+                toDelete.add(row);
+        data.removeAll(toDelete);
+
+        fileControl.insertAllData(path, data, headers);
         return true;
     }
 

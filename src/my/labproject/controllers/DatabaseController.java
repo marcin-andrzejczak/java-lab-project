@@ -117,15 +117,10 @@ public class DatabaseController {
             log.DEBUG("Trying to update data in the table");
             log.WARN("Functionality still under construction");
             Statements.update(query);
-            return;
 
         } else if ("DELETE".equals(s)){
             log.DEBUG("Under construction!");
-            return;
-
-        } else if ("EXIT".equals(s)){
-            return;
-
+            Statements.delete(query);
         } else {
             log.ERROR("Syntax error! Command could not be interpreted!");
         }
