@@ -11,7 +11,7 @@ import java.util.Arrays;
 public class DatabaseController {
 
     private final Config config = new Config();
-    private final LoggerController log = new LoggerController(LoggerController.Constants.DEBUG);
+    private final LoggerController log = new LoggerController();
     private final FileController fileControl = new FileController();
     private final PatternMatcher patternMatcher = new PatternMatcher();
     private final Statements statements = new Statements();

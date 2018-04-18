@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 
 public class PatternMatcher {
 
-    private final LoggerController log = new LoggerController(LoggerController.Constants.DEBUG);
+    private final LoggerController log = new LoggerController();
 
     public boolean match(Pattern pattern, String query){
         Matcher m = pattern.matcher(query);

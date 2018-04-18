@@ -15,7 +15,7 @@ import java.util.HashMap;
 public class Statements {
 
     private static final Config config = new Config();
-    private static final LoggerController log = new LoggerController(LoggerController.Constants.DEBUG);
+    private static final LoggerController log = new LoggerController();
     private static final FileController fileControl = new FileController();
     private static final PatternMatcher patternMatcher = new PatternMatcher();
 

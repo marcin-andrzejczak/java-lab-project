@@ -10,8 +10,7 @@ import java.io.InputStreamReader;
 public class CliController {
 
     private final Config config = new Config();
-    private final LoggerController log = new LoggerController(LoggerController.Constants.DEBUG);
-    private final String prompt = Constants.PROMPT;
+    private final LoggerController log = new LoggerController();
 
     public String readCommand(){
         InputStreamReader input = new InputStreamReader(System.in);
@@ -20,7 +19,7 @@ public class CliController {
         String command = "";
 
         try {
-            System.out.print( !( "".equals(usedDb) || usedDb == null) ? "("+usedDb+")" : this.prompt);
+            System.out.print( !( "".equals(usedDb) || usedDb == null) ? "("+usedDb+")" : Constants.PROMPT);
             command = reader.readLine();
             log.DEBUG("Entered command: "+command);
         } catch (IOException ex) {

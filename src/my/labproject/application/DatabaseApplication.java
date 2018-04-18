@@ -11,7 +11,7 @@ public class DatabaseApplication {
     private final Config config = new Config();
     private final CliController cli = new CliController();
     private final DatabaseController db = new DatabaseController();
-    private final LoggerController log = new LoggerController(LoggerController.Constants.DEBUG);
+    private final LoggerController log = new LoggerController();
 
     public void run(){
         String command;
