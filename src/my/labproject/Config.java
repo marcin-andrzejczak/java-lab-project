@@ -49,7 +49,7 @@ public class Config {
 
         public static final Pattern Select          = Pattern.compile("^SELECT (\\*|\\s?\\w+( ?, ?\\w+)*) FROM \\w+( WHERE \\w+ ?(>|>=|==|<=|<|!=) ?.+)?;$");
 
-        public static final Pattern Insert          = Pattern.compile("^INSERT INTO \\w+( ?\\( ?\\w+( ?, ?\\w+)*\\))? VALUES \\( ?\\w+( ?, ?\\w+)*\\);$");
+        public static final Pattern Insert          = Pattern.compile("^INSERT INTO \\w+( ?\\( ?\\w+( ?, ?\\w+)*\\))? VALUES \\( ?\\w+( ?, ?\\w+ ?)*\\);$");
 
         // TODO after creating the method for it (just for the sake of easier testing
         public static final Pattern Update          = Pattern.compile("^UPDATE .*$");

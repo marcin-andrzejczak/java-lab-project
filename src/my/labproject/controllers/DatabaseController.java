@@ -51,9 +51,8 @@ public class DatabaseController {
         if( !patternMatcher.matchesAnyAvailable(query.toUpperCase()) ){
             log.ERROR("Syntax error! Command could not be interpreted!");
             return;
-        } else if( config.getUsedDatabase() == null || config.getUsedWorkspace() == null ) {
+        } else if( config.getUsedWorkspace() == null ) {
             log.ERROR("Wrong environment settings detected. ");
-            log.ERROR("Used database:  "+config.getUsedDatabase());
             log.ERROR("Used workspace: "+config.getUsedWorkspace());
             return;
         }

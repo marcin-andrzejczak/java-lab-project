@@ -5,6 +5,7 @@ import my.labproject.controllers.FileController;
 import my.labproject.controllers.LoggerController;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 /**
@@ -184,7 +185,7 @@ public class Statements {
         } else {
             data = fileControl.readData(path, headersToGet);
         }
-        //ArrayList<HashMap<String, String>> data = fileControl.readData(path, headersToGet);
+
         for( HashMap fields : data ){
             for( String header : headersToGet ){
                 sb.append(fields.get(header)).append(Config.Constants.SELECT_DATA_SEPARATOR);
@@ -224,26 +225,62 @@ public class Statements {
 
     // TODO absolutely not working, just selecting with where clause right now ( served a purpose as a playground )
     public static boolean update(String query){
-        // TODO check if table exists
-        String tableName = query.split(" ")[1];
-        String path = config.getUsedWorkspace()+config.getUsedDatabase()+"/"+tableName+".txt";
+        String tableName = query.split("(update|set)")[1].trim();
+        log.WARN(tableName);
 
-        // Right now only testing WHERE clause using one condition
+        String path = config.getUsedWorkspace()+config.getUsedDatabase()+"/"+tableName+".txt";
+        if( !fileControl.exists(path) ){
+            log.ERROR("Table does not exist");
+            return false;
+        }
+
+        String setPart = query.split("(set|where)")[1];
+        ArrayList<String> setList = new ArrayList<String>(Arrays.asList(setPart.trim().split(",")));
+        HashMap<String, String> setMap = new HashMap<>();
+
+        for(String set : setList){
+            setMap.put(set.split("=")[0].trim(), set.split("=")[1].trim());
+        }
+
         String conditionPart = query.split("WHERE|where")[1];
-        String header = conditionPart.trim().split("(>|>=|==|<=|<|!=)")[0].trim();
+        String headerWhere = conditionPart.trim().split("(>|>=|==|<=|<|!=)")[0].trim();
         String operator = patternMatcher.retrieve("(>|>=|==|<=|<|!=)", conditionPart);
         String value = conditionPart.trim().split("(>|>=|==|<=|<|!=)")[1].trim();
 
-        ArrayList<HashMap<String, String>> data = where(fileControl.readData(path), header, operator, value);
+        if( "".equals(headerWhere) || "".equals(operator) || "".equals(value) )
+            return false;
 
-        for(HashMap<String, String> d : data){
-            log.DEBUG(d.values().toString());
+        ArrayList<String> headers = fileControl.readHeader(path);
+        ArrayList<HashMap<String, String>> data = fileControl.readData(path);
+
+
+        ArrayList<HashMap<String, String>> result;
+        for(HashMap<String, String> row : data){
+            //row.put();
         }
 
-//        ArrayList<String> headers = new ArrayList<String>(Arrays.asList(query.split("([()])")[1].split(",")));
-//        ArrayList<String> data = new ArrayList<String>(Arrays.asList(query.split("([()])")[3].split(",")));
+        log.INFO(data.toString());
 
         return true;
+//        String headerWhere = conditionPart.trim().split("(>|>=|==|<=|<|!=)")[0].trim();
+
+//        String path = config.getUsedWorkspace()+config.getUsedDatabase()+"/"+tableName+".txt";
+//
+//
+//
+//        if( !fileControl.exists(path) ){
+//            log.ERROR("Table does not exist");
+//            return false;
+//        }
+//
+//        ArrayList<String> headers = fileControl.readHeader(config.getUsedWorkspace()+config.getUsedDatabase()+"/hehe.txt");
+//        ArrayList<HashMap<String, String>> data = fileControl.readData(config.getUsedWorkspace()+config.getUsedDatabase()+"/hehe.txt");
+//
+//
+//
+//        fileControl.insertAllData(config.getUsedWorkspace()+config.getUsedDatabase()+"/test.txt", data, headers);
+//
+//        return true;
     }
 
 
@@ -261,35 +298,41 @@ public class Statements {
         ArrayList<HashMap<String, String>> result = new ArrayList<>();
 
         for( HashMap<String, String> data : allData){
-            boolean isNumeric;
-            Integer number = null;
-            try{
-                number = Integer.parseInt(data.get(header));
-                isNumeric = true;
-            } catch( Exception ex ){
-                isNumeric = false;
-            }
 
-            if( (">".equals(operator) || ">=".equals(operator)) && isNumeric ){
-                // TODO
-            }
-            if( ">=".equals(operator) || "==".equals(operator) || "<=".equals(operator) ){
-                if( data.get(header).equals(value) ) {
-                    result.add(data);
-                    continue;
-                }
-            }
-            if( "<=".equals(operator) || "<".equals(operator) ){
-                // TODO
-            }
-            if( "!=".equals(operator) ){
-                if( !data.get(header).equals(value) ) {
-                    result.add(data);
-                }
-            }
+            if( fulfillsCondition(data.get(header), operator, value) )
+                result.add(data);
+
         }
 
         return result;
+    }
+
+    private static boolean fulfillsCondition(String leftValue, String operator, String rightValue){
+        boolean isNumeric;
+        Integer number = null;
+        try{
+            number = Integer.parseInt(leftValue);
+            isNumeric = true;
+        } catch( Exception ex ){
+            isNumeric = false;
+        }
+
+        if( (">".equals(operator) || ">=".equals(operator)) && isNumeric ){
+            // TODO
+        }
+        if( ">=".equals(operator) || "==".equals(operator) || "<=".equals(operator) ){
+            if( leftValue.equals(rightValue) ) return true;
+            else return false;
+        }
+        if( "<=".equals(operator) || "<".equals(operator) ){
+            // TODO
+        }
+        if( "!=".equals(operator) ){
+            if( !leftValue.equals(rightValue) ) return true;
+            else return false;
+        }
+
+        return false;
     }
 
 }

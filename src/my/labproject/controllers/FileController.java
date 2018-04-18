@@ -130,6 +130,43 @@ public class FileController {
         return saveLineToFile(path, sb.toString());
     }
 
+    public boolean insertAllData(String path, ArrayList<HashMap<String, String>> allData, ArrayList<String> headers){
+        if( "".equals(path) || allData.isEmpty() || !exists(path) )
+            return false;
+
+        StringBuilder sb = new StringBuilder();
+        int indexToReplace;
+
+        if( headers.isEmpty() || headers.size() != allData.get(0).size() )
+            return false;
+
+        try (PrintWriter output = new PrintWriter(new FileWriter(path))){
+
+            for(String header : headers){
+                if( "".equals(header) ) return false;
+                sb.append(header.trim()).append(Config.Constants.DATA_DELIMITER);
+            }
+            indexToReplace = sb.lastIndexOf(Config.Constants.DATA_DELIMITER);
+            sb.replace(indexToReplace,indexToReplace+1,"\n" );
+
+            for(HashMap<String, String> dataRow : allData){
+                for( String header : headers ){
+                    if( !dataRow.containsKey(header) ) return false;
+                    sb.append(dataRow.get(header)).append(Config.Constants.DATA_DELIMITER);
+                }
+                indexToReplace = sb.lastIndexOf(Config.Constants.DATA_DELIMITER);
+                sb.replace(indexToReplace,indexToReplace+1,"\n" );
+            }
+            sb.deleteCharAt(sb.lastIndexOf("\n"));
+
+            output.println(sb.toString());
+        } catch ( IOException ex ){
+            return false;
+        }
+
+        return true;
+    }
+
     public ArrayList<String> readHeader(String path){
         ArrayList<String> headers = new ArrayList<>();
         File file = new File(path);
@@ -142,7 +179,6 @@ public class FileController {
 
             if( !"".equals(line) )
                 headers = new ArrayList<>(Arrays.asList(line.split(Config.Constants.DATA_DELIMITER)));
-
         } catch ( IOException ex ){
             return headers;
         }
@@ -165,9 +201,11 @@ public class FileController {
             while( (line = br.readLine()) != null ) {
                 HashMap<String, String> row = new HashMap<>();
                 ArrayList<String> rowData = new ArrayList<>(Arrays.asList(line.split(Config.Constants.DATA_DELIMITER)));
+                int index = 0;
                 for(String param : rowData){
-                    if( headersToGet == null || headersToGet.contains(headers.get(rowData.indexOf(param))) )
-                        row.put(headers.get(rowData.indexOf(param)), param );
+                    if( headersToGet == null || headersToGet.contains(headers.get(rowData.indexOf(param))) ) {
+                        row.put(headers.get(index++), param);
+                    }
                 }
                 data.add( row );
             }
@@ -176,29 +214,6 @@ public class FileController {
         }
 
         return data;
-    }
-
-
-    // TODO whole machanism of deleting lines
-    public boolean deleteLines(String path, String header, String operator, String value){
-        try {
-            BufferedReader file = new BufferedReader(new FileReader(path));
-            StringBuffer inputBuffer = new StringBuffer();
-            ArrayList<String> headers = readHeader(path);
-            HashMap<String, String> parsedLine;
-            String line;
-
-            while ((line = file.readLine()) != null) {
-                parsedLine = parseLine(line, headers);
-                inputBuffer.append(line).append('\n');
-            }
-            String inputStr = inputBuffer.toString();
-
-            file.close();
-        } catch (Exception ex) {
-            return false;
-        }
-        return true;
     }
 
     public HashMap<String, String> parseLine(String line, ArrayList<String> headers){
