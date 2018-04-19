@@ -19,7 +19,7 @@ public class CliController {
         String command = "";
 
         try {
-            System.out.print( !( "".equals(usedDb) || usedDb == null) ? "("+usedDb+")" : Constants.PROMPT);
+            System.out.print( !( "".equals(usedDb) || usedDb == null) ? "("+usedDb+") " : Constants.PROMPT);
             command = reader.readLine();
             log.DEBUG("Entered command: "+command);
         } catch (IOException ex) {

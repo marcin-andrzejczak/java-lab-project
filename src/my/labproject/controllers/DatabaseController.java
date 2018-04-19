@@ -15,7 +15,7 @@ public class DatabaseController {
     private final FileController fileControl = new FileController();
     private final PatternMatcher patternMatcher = new PatternMatcher();
     private final Statements statements = new Statements();
-    private String workspace = Constants.DEFAULT_WORKSPACE;
+    private String workspace;
 
 
     public DatabaseController(){
@@ -58,24 +58,17 @@ public class DatabaseController {
             return;
         }
 
-        if( query.lastIndexOf(";") == query.length()-1 )
-            query = query.substring(0, query.length()-1);
-
         String[] components = query.split(" ");
         String s = components[0].toUpperCase();
         if ("CREATE".equals(s)) switch (components[1].toUpperCase()) {
             case "DATABASE":
-                log.DEBUG("Trying to create \"" + components[2] + "\" database.");
-                statements.createDatabase(components[2]);
+                log.DEBUG("Trying to create \"" + components[2] + "\" database");
+                statements.createDatabase(query);
                 break;
 
             case "TABLE":
-                String tName = components[2];
-                if( tName.contains("(") )
-                    tName = tName.substring(0, tName.lastIndexOf("("));
-                log.DEBUG("Trying to create \"" + tName + "\" table inside \"" + config.getUsedDatabase() + "\" database.");
-                ArrayList<String> params = new ArrayList<String>(Arrays.asList(query.split("([()])")[1].split(",")));
-                statements.createTable(tName, params);
+                log.DEBUG("Trying to create \"" + components[2] + "\" database");
+                statements.createTable(query);
                 break;
 
         } else if ("SHOW".equals(s)) switch (components[1].toUpperCase()) {
@@ -91,7 +84,7 @@ public class DatabaseController {
 
             case "TABLE":
                 log.DEBUG("Trying to show all fields in the table \""+components[2]+"\'.");
-                statements.showTable(components[2]);
+                statements.showTable(query);
                 break;
 
         } else if ("USE".equals(s)) {
@@ -122,7 +115,7 @@ public class DatabaseController {
         } else if ("DELETE".equals(s)){
             log.DEBUG("Under construction!");
             statements.delete(query);
-        } else {
+        } else if (!"EXIT".equals(s)) {
             log.ERROR("Syntax error! Command could not be interpreted!");
         }
 

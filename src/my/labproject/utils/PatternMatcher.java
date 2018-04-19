@@ -18,9 +18,19 @@ public class PatternMatcher {
         return m.matches();
     }
 
+    // TODO
     public String retrieve(String pattern, String query){
-        Matcher m = Pattern.compile(pattern).matcher(query);
-        return m.find() ? m.group(1) : null;
+        return retrieve(Pattern.compile(pattern), query, 1);
+    }
+
+    public String retrieve(Pattern pattern, String query, Integer position){
+        Matcher m = pattern.matcher(query);
+        return m.find() ? m.group(position) : null;
+    }
+
+    public Integer getGroupsCount(Pattern pattern, String query){
+        Matcher m = pattern.matcher(query);
+        return m.groupCount();
     }
 
     public boolean matchesAnyAvailable(String query){

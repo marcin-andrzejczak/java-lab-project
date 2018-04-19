@@ -30,7 +30,7 @@ public class Config {
 
     public static class Constants {
 
-        public static final String DEFAULT_WORKSPACE = "E:/DB_TEST/labApplication/";
+        public static final String DEFAULT_WORKSPACE = "DB_TEST/";
 
         public static final String PROMPT =  "\t-> ";
 
@@ -44,23 +44,36 @@ public class Config {
 
     public static class StatementPatterns {
 
-        public static final Pattern Create          = Pattern.compile("^CREATE (DATABASE \\w+|TABLE \\w+ ?\\( ?\\w+( ?, ?\\w+)*\\));$");
+    // REFACTORED PATTERNS
+        public static final Pattern CreateDatabase  = Pattern.compile("^CREATE DATABASE (\\w+)$", Pattern.CASE_INSENSITIVE);
 
-        public static final Pattern Show            = Pattern.compile("^SHOW (DATABASES|TABLES|TABLE \\w+);$");
+        public static final Pattern CreateTable     = Pattern.compile("^CREATE TABLE (\\w+) ?\\( ?\\w+( ?, ?\\w+)*\\)$", Pattern.CASE_INSENSITIVE);
 
-        public static final Pattern Use             = Pattern.compile("^USE \\w+;$");
+        public static final Pattern ShowDatabases   = Pattern.compile("^SHOW DATABASES$", Pattern.CASE_INSENSITIVE);
 
-        public static final Pattern Using           = Pattern.compile("^USING;$");
+        public static final Pattern ShowTables      = Pattern.compile("^SHOW TABLES$", Pattern.CASE_INSENSITIVE);
 
-        public static final Pattern Select          = Pattern.compile("^SELECT (\\*|\\s?\\w+( ?, ?\\w+)*) FROM \\w+( WHERE \\w+ ?(>|>=|==|<=|<|!=) ?.+)?;$");
+        public static final Pattern ShowTable       = Pattern.compile("^SHOW TABLE (\\w+)$", Pattern.CASE_INSENSITIVE);
 
-        public static final Pattern Insert          = Pattern.compile("^INSERT INTO \\w+( ?\\( ?\\w+( ?, ?\\w+)*\\))? VALUES \\( ?\\w+( ?, ?\\w+ ?)*\\);$");
+        public static final Pattern Use             = Pattern.compile("^USE (\\w+)$", Pattern.CASE_INSENSITIVE);
 
-        public static final Pattern Update          = Pattern.compile("^UPDATE \\w+ SET \\w+ ?= ?\\w+( ?, ?\\w+ ?= ?\\w+)* WHERE \\w+ ?==?\\w+;$");
+        public static final Pattern Using           = Pattern.compile("^USING$", Pattern.CASE_INSENSITIVE);
 
-        public static final Pattern Delete          = Pattern.compile("^DELETE FROM \\w+ WHERE \\w+ ?==?\\w+;$");
+        // OLD PATTERNS
+        @Deprecated
+        public static final Pattern Create          = Pattern.compile("^CREATE (DATABASE \\w+|TABLE \\w+ ?\\( ?\\w+( ?, ?\\w+)*\\))$", Pattern.CASE_INSENSITIVE);
+        @Deprecated
+        public static final Pattern Show            = Pattern.compile("^SHOW (DATABASES|TABLES|TABLE \\w+)$", Pattern.CASE_INSENSITIVE);
 
-        public static final Pattern Exit            = Pattern.compile("^EXIT;?$");
+        public static final Pattern Select          = Pattern.compile("^SELECT (\\*|\\s?\\w+( ?, ?\\w+)*) FROM \\w+( WHERE \\w+ ?(>|>=|==|<=|<|!=) ?.+)?$", Pattern.CASE_INSENSITIVE);
+
+        public static final Pattern Insert          = Pattern.compile("^INSERT INTO \\w+( ?\\( ?\\w+( ?, ?\\w+)*\\))? VALUES \\( ?\\w+( ?, ?\\w+ ?)*\\)$", Pattern.CASE_INSENSITIVE);
+
+        public static final Pattern Update          = Pattern.compile("^UPDATE \\w+ SET \\w+ ?= ?\\w+( ?, ?\\w+ ?= ?\\w+)* WHERE \\w+ ?==?\\w+$", Pattern.CASE_INSENSITIVE);
+
+        public static final Pattern Delete          = Pattern.compile("^DELETE FROM \\w+ WHERE \\w+ ?==?\\w+$", Pattern.CASE_INSENSITIVE);
+
+        public static final Pattern Exit            = Pattern.compile("^EXIT$", Pattern.CASE_INSENSITIVE);
 
     }
 
