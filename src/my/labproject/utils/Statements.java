@@ -8,7 +8,6 @@ import my.labproject.controllers.LoggerController;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.regex.Pattern;
 
 /**
  *  Statements implementation
@@ -26,8 +25,9 @@ public class Statements {
     public boolean createDatabase(String query){
         // SYNTAX: CREATE DATABASE dbName
         String dbName = patternMatcher.retrieve(StatementPatterns.CreateDatabase, query, 1);
+        String path = getDbPath(dbName);
 
-        if( fileControl.create(getDbPath(dbName), "d") ){
+        if( path != null && fileControl.create( path, "d") ){
             log.INFO("Successfully created database: \""+dbName+"\"");
             return true;
         } else {
@@ -35,21 +35,6 @@ public class Statements {
         }
         return false;
     }
-
-    public boolean createTable(String name, ArrayList<String> params){
-        String path = config.getUsedWorkspace()+config.getUsedDatabase()+"/"+name+".txt";
-
-        log.DEBUG("Creating table \""+name+"\" with path \""+path+"\".");
-        if( config.getUsedDatabase() != null && fileControl.create(path, "f")
-            && fileControl.saveLineToFile(path, params)) {
-            log.INFO("Successfully created table \""+name+"\"");
-            return true;
-        } else {
-            log.ERROR("Could not create table \""+name+"\"!");
-        }
-        return false;
-    }
-
 
     /*
      *  TODO - better param retriever
@@ -89,8 +74,8 @@ public class Statements {
             else
                 sb.append("       ").append(database).append("\n");
         }
-
         log.INFO(sb.toString());
+
         return true;
     }
 
@@ -137,12 +122,11 @@ public class Statements {
     public boolean use(String query){
         String dbName = patternMatcher.retrieve(StatementPatterns.Use, query, 1);
 
-        if(config.getUsedWorkspace().isEmpty()){
+        if( isNullOrEmpty(config.getUsedWorkspace()) ){
             log.ERROR("Workspace field is empty!");
         } else {
-
             String path = getDbPath(dbName);
-            if (fileControl.exists(path)) {
+            if (path != null && fileControl.exists(path)) {
                 config.setUsedDatabase(dbName);
                 log.INFO("Using database \"" + dbName + "\"");
                 return true;
@@ -150,14 +134,33 @@ public class Statements {
             } else {
                 log.ERROR("Could not use database \"" + dbName + "\". Database does not exists!");
             }
-
         }
+
         return false;
     }
 
     // NO NEED FOR REFACTORING
     public boolean using(){
         log.INFO("Currently use: \""+config.getUsedDatabase()+"\" database and \""+config.getUsedWorkspace()+"\" workspace.");
+        return true;
+    }
+
+    public boolean selectRf(String query){
+        String tableName = patternMatcher.retrieve(StatementPatterns.Select, query, 3);
+        String headersToGet = patternMatcher.retrieve(StatementPatterns.Select, query, 1);
+        log.DEBUG(headersToGet);
+        return true;
+
+        String path = getTablePath(tableName);
+
+        if( path == null || !fileControl.exists(path) ){
+            log.ERROR("Could not select data from table \""+tableName+"\", because it does not exist!");
+            return false;
+        }
+
+
+
+        log.DEBUG("TNAME: '"+tableName+"'\nPATH: '"+path);
         return true;
     }
 
@@ -329,10 +332,12 @@ public class Statements {
      */
 
     private String getTablePath(String tName){
+        if( tName == null || config.getUsedDatabase() == null ) return null;
         return getDbPath(config.getUsedDatabase()).concat("/".concat(tName));
     }
 
     private String getDbPath(String dbName){
+        if( dbName == null ) return null;
         return config.getUsedWorkspace().concat(dbName);
     }
 
@@ -372,6 +377,11 @@ public class Statements {
             return !leftValue.equals(rightValue);
         }
 
+        return false;
+    }
+
+    private boolean isNullOrEmpty(String s){
+        if( s == null || "".equals(s)) return true;
         return false;
     }
 

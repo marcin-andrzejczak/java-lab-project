@@ -40,7 +40,7 @@ public class FileController {
 
     public boolean exists(String dirname){
         try {
-            if ( "".equals(dirname) ) return false;
+            if ( dirname == null || "".equals(dirname) ) return false;
 
             File file = new File(dirname);
             if ( file.exists() ) return true;

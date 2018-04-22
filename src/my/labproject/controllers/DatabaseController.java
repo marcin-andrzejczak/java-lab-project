@@ -89,7 +89,7 @@ public class DatabaseController {
 
         } else if ("USE".equals(s)) {
             log.DEBUG("Trying to use \"" + components[1] + "\" database.");
-            statements.use(components[1]);
+            statements.use(query);
 
         } else if ("USING".equals(s)) {
             log.DEBUG("Trying to invoke \"USING\" statement.");
@@ -103,9 +103,10 @@ public class DatabaseController {
 
         } else if ( "SELECT".equals(s) ) {
             log.DEBUG("Trying to select data from table");
-            String tableName = query.toUpperCase().split("(FROM|WHERE)")[1].trim();
-            ArrayList<String> headers = new ArrayList<String>(Arrays.asList(query.toUpperCase().split("(SELECT|FROM)")[1].split(",")));
-            statements.select( tableName, headers, query);
+//            String tableName = query.toUpperCase().split("(FROM|WHERE)")[1].trim();
+//            ArrayList<String> headers = new ArrayList<String>(Arrays.asList(query.toUpperCase().split("(SELECT|FROM)")[1].split(",")));
+//            statements.select( tableName, headers, query);
+            statements.selectRf(query);
 
         } else if ("UPDATE".equals(s)){
             log.DEBUG("Trying to update data in the table");
