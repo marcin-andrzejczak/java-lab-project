@@ -341,6 +341,10 @@ public class Statements {
         return fileControl.insertAllData(path, data, headers);
     }
 
+    public boolean exit(){
+        return true;
+    }
+
     /*
      *  HELPER FUNCTIONS
      */

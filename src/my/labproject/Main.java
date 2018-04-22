@@ -16,7 +16,8 @@ public class Main {
         try {
             app.run();
         } catch (Exception ex){
-            log.ERROR("Exception occurred!\n"+ Arrays.toString(ex.getStackTrace()));
+            log.ERROR("Exception occurred!\n");
+            ex.printStackTrace();
         }
 	    log.INFO("Exiting application");
     }

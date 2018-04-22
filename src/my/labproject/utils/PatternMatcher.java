@@ -1,11 +1,7 @@
 package my.labproject.utils;
 
-import my.labproject.Config.StatementPatterns;
 import my.labproject.controllers.LoggerController;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,28 +27,6 @@ public class PatternMatcher {
     public Integer getGroupsCount(Pattern pattern, String query){
         Matcher m = pattern.matcher(query);
         return m.groupCount();
-    }
-
-    public boolean matchesAnyAvailable(String query){
-        ArrayList<Pattern> patternsAvailable = new ArrayList<>();
-
-        try {
-            Field[] fields = StatementPatterns.class.getDeclaredFields();
-            for (Field f : fields) {
-                if (Modifier.isStatic(f.getModifiers())) {
-                    patternsAvailable.add( (Pattern) f.get(null));
-                }
-            }
-        } catch ( IllegalAccessException ex ){
-            return false;
-        }
-
-        for( Pattern pattern : patternsAvailable ){
-            if( match(pattern, query) )
-                return true;
-        }
-
-        return false;
     }
 
 }
