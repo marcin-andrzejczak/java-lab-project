@@ -3,6 +3,8 @@ package my.labproject;
 import my.labproject.application.DatabaseApplication;
 import my.labproject.controllers.LoggerController;
 
+import java.util.Arrays;
+
 public class Main {
 
     private final static LoggerController log = new LoggerController();
@@ -11,7 +13,11 @@ public class Main {
         DatabaseApplication app = new DatabaseApplication();
 
         log.INFO("Starting application");
-	    app.run();
+        try {
+            app.run();
+        } catch (Exception ex){
+            log.ERROR("Exception occurred!\n"+ Arrays.toString(ex.getStackTrace()));
+        }
 	    log.INFO("Exiting application");
     }
 }

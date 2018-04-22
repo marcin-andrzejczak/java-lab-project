@@ -4,9 +4,9 @@ import java.util.regex.Pattern;
 
 public class Config {
 
-    private static String usedWorkspace;
+    private static String usedWorkspace = null;
 
-    private static String usedDatabase;
+    private static String usedDatabase = null;
 
     public String getUsedWorkspace() {
         return usedWorkspace;
@@ -44,10 +44,9 @@ public class Config {
 
     public static class StatementPatterns {
 
-    // REFACTORED PATTERNS
         public static final Pattern CreateDatabase  = Pattern.compile("^CREATE DATABASE (\\w+)$", Pattern.CASE_INSENSITIVE);
 
-        public static final Pattern CreateTable     = Pattern.compile("^CREATE TABLE (\\w+) ?\\( ?\\w+( ?, ?\\w+)*\\)$", Pattern.CASE_INSENSITIVE);
+        public static final Pattern CreateTable     = Pattern.compile("^CREATE TABLE (\\w+) ?\\( ?(\\w+( ?, ?\\w+)*)\\)$", Pattern.CASE_INSENSITIVE);
 
         public static final Pattern ShowDatabases   = Pattern.compile("^SHOW DATABASES$", Pattern.CASE_INSENSITIVE);
 
@@ -61,22 +60,17 @@ public class Config {
 
         public static final Pattern Select          = Pattern.compile("^SELECT (\\*|\\s?\\w+( ?, ?\\w+)*) FROM (\\w+)( WHERE \\w+ ?(>|>=|==|<=|<|!=) ?.+)?$", Pattern.CASE_INSENSITIVE);
 
-        public static final Pattern Insert          = Pattern.compile("^INSERT INTO \\w+( ?\\( ?\\w+( ?, ?\\w+)*\\))? VALUES \\( ?\\w+( ?, ?\\w+ ?)*\\)$", Pattern.CASE_INSENSITIVE);
+        public static final Pattern Insert          = Pattern.compile("^INSERT INTO (\\w+) ?\\(( ?\\w+( ?, ?\\w+)*)?\\) VALUES ?\\( ?(.+( ?, ?.+ ?)*)\\)$", Pattern.CASE_INSENSITIVE);
 
-        public static final Pattern Update          = Pattern.compile("^UPDATE \\w+ SET \\w+ ?= ?\\w+( ?, ?\\w+ ?= ?\\w+)* WHERE \\w+ ?==?\\w+$", Pattern.CASE_INSENSITIVE);
+        public static final Pattern Update          = Pattern.compile("^UPDATE (\\w+) SET (\\w+ ?= ?\\w+( ?, ?\\w+ ?= ?\\w+)*) WHERE \\w+ ?(>|>=|==|<=|<|!=) ?.+$", Pattern.CASE_INSENSITIVE);
 
-        public static final Pattern Delete          = Pattern.compile("^DELETE FROM \\w+ WHERE \\w+ ?==?\\w+$", Pattern.CASE_INSENSITIVE);
+        public static final Pattern Delete          = Pattern.compile("^DELETE FROM (\\w+) WHERE (\\w+ ?(>|>=|==|<=|<|!=) ?\\w+)$", Pattern.CASE_INSENSITIVE);
+
+        public static final Pattern DropDatabase    = Pattern.compile("^DROP DATABASE (\\w+)$", Pattern.CASE_INSENSITIVE);
+
+        public static final Pattern DropTable       = Pattern.compile("^DROP TABLE (\\w+)$", Pattern.CASE_INSENSITIVE);
 
         public static final Pattern Exit            = Pattern.compile("^EXIT$", Pattern.CASE_INSENSITIVE);
-
-        // OLD PATTERNS
-        @Deprecated
-        public static final Pattern Create          = Pattern.compile("^CREATE (DATABASE \\w+|TABLE \\w+ ?\\( ?\\w+( ?, ?\\w+)*\\))$", Pattern.CASE_INSENSITIVE);
-        @Deprecated
-        public static final Pattern Show            = Pattern.compile("^SHOW (DATABASES|TABLES|TABLE \\w+)$", Pattern.CASE_INSENSITIVE);
-
-
-
 
     }
 

@@ -5,9 +5,6 @@ import my.labproject.Config.Constants;
 import my.labproject.utils.PatternMatcher;
 import my.labproject.utils.Statements;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
 public class DatabaseController {
 
     private final Config config = new Config();
@@ -60,33 +57,50 @@ public class DatabaseController {
 
         String[] components = query.split(" ");
         String s = components[0].toUpperCase();
-        if ("CREATE".equals(s)) switch (components[1].toUpperCase()) {
-            case "DATABASE":
-                log.DEBUG("Trying to create \"" + components[2] + "\" database");
-                statements.createDatabase(query);
-                break;
+        if ("CREATE".equals(s)) {
+            switch (components[1].toUpperCase()) {
+                case "DATABASE":
+                    log.DEBUG("Trying to create \"" + components[2] + "\" database");
+                    statements.createDatabase(query);
+                    break;
 
-            case "TABLE":
-                log.DEBUG("Trying to create \"" + components[2] + "\" database");
-                statements.createTable(query);
-                break;
+                case "TABLE":
+                    log.DEBUG("Trying to create \"" + components[2] + "\" table");
+                    statements.createTable(query);
+                    break;
 
-        } else if ("SHOW".equals(s)) switch (components[1].toUpperCase()) {
-            case "DATABASES":
-                log.DEBUG("Trying to show all databases.");
-                statements.showDatabases();
-                break;
+            }
+        } else if ("DROP".equals(s)) {
+            switch (components[1].toUpperCase()) {
+                case "DATABASE":
+                    log.DEBUG("Trying to drop \"" + components[2] + "\" database");
+                    statements.dropDatabase(query);
+                    break;
 
-            case "TABLES":
-                log.DEBUG("Trying to show all tables in database \""+config.getUsedDatabase()+"\'.");
-                statements.showTables();
-                break;
+                case "TABLE":
+                    log.DEBUG("Trying to drop \"" + components[2] + "\" table");
+                    statements.dropTable(query);
+                    break;
 
-            case "TABLE":
-                log.DEBUG("Trying to show all fields in the table \""+components[2]+"\'.");
-                statements.showTable(query);
-                break;
+            }
+        } else if ("SHOW".equals(s)) {
+            switch (components[1].toUpperCase()) {
+                case "DATABASES":
+                    log.DEBUG("Trying to show all databases.");
+                    statements.showDatabases();
+                    break;
 
+                case "TABLES":
+                    log.DEBUG("Trying to show all tables in database \""+config.getUsedDatabase()+"\'.");
+                    statements.showTables();
+                    break;
+
+                case "TABLE":
+                    log.DEBUG("Trying to show all fields in the table \""+components[2]+"\'.");
+                    statements.showTable(query);
+                    break;
+
+            }
         } else if ("USE".equals(s)) {
             log.DEBUG("Trying to use \"" + components[1] + "\" database.");
             statements.use(query);
@@ -97,24 +111,18 @@ public class DatabaseController {
 
         } else if ( "INSERT".equals(s) ) {
             log.DEBUG("Trying to insert data into table");
-            ArrayList<String> headers = new ArrayList<String>(Arrays.asList(query.split("([()])")[1].split(",")));
-            ArrayList<String> data = new ArrayList<String>(Arrays.asList(query.split("([()])")[3].split(",")));
-            statements.insert(components[2], headers, data);
+            statements.insert(query);
 
         } else if ( "SELECT".equals(s) ) {
             log.DEBUG("Trying to select data from table");
-//            String tableName = query.toUpperCase().split("(FROM|WHERE)")[1].trim();
-//            ArrayList<String> headers = new ArrayList<String>(Arrays.asList(query.toUpperCase().split("(SELECT|FROM)")[1].split(",")));
-//            statements.select( tableName, headers, query);
-            statements.selectRf(query);
+            statements.select(query);
 
         } else if ("UPDATE".equals(s)){
             log.DEBUG("Trying to update data in the table");
-            log.WARN("Functionality still under construction");
             statements.update(query);
 
         } else if ("DELETE".equals(s)){
-            log.DEBUG("Under construction!");
+            log.DEBUG("Trying to delete data from the table!");
             statements.delete(query);
         } else if (!"EXIT".equals(s)) {
             log.ERROR("Syntax error! Command could not be interpreted!");

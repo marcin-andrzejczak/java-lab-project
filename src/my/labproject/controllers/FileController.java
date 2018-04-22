@@ -13,29 +13,20 @@ public class FileController {
     private final LoggerController log = new LoggerController();
 
     public boolean create(String pathname, String mode){
-        Boolean result = false;
-
         try {
             File dir = new File(pathname);
             switch (mode) {
-                case "dr":
-                    result = dir.mkdirs();
-                    break;
-                case "d":
-                    result = dir.mkdir();
-                    break;
-                case "f":
-                    result = dir.createNewFile();
-                    break;
+                case "dr":  return dir.mkdirs();
+                case "d":   return dir.mkdir();
+                case "f":   return dir.createNewFile();
                 default:
                     log.ERROR("Could not create file/directory. Wrong mode!");
-                    break;
+                    return false;
             }
         } catch( Exception ex ){
             log.ERROR("Exception occurred!\n"+ex.getMessage());
+            return false;
         }
-
-        return result ;
     }
 
     public boolean exists(String dirname){
@@ -53,7 +44,7 @@ public class FileController {
     }
 
     public boolean deleteAll(String path) {
-        if( "".equals(path) ) return false;
+        if( "".equals(path) || path == null ) return false;
 
         File dir = new File(path);
         File[] allContents = dir.listFiles();
@@ -171,11 +162,10 @@ public class FileController {
     public ArrayList<String> readHeader(String path){
         ArrayList<String> headers = new ArrayList<>();
         File file = new File(path);
-        String line;
         try {
             FileInputStream fis = new FileInputStream(file);
             BufferedReader br = new BufferedReader(new InputStreamReader(fis));
-            line = br.readLine();
+            String line = br.readLine();
             br.close();
 
             if( !"".equals(line) )
