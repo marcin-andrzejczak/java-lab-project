@@ -1,9 +1,10 @@
-package my.labproject.utils;
+package my.labproject.controllers;
 
 import my.labproject.Config;
 import my.labproject.Config.StatementPatterns;
-import my.labproject.controllers.FileController;
-import my.labproject.controllers.LoggerController;
+import my.labproject.utils.PathUtil;
+import my.labproject.utils.PatternMatcher;
+import my.labproject.utils.StringUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,18 +14,18 @@ import java.util.HashMap;
  *  Statements implementation
  */
 
-public class Statements {
+public class StatementsController {
 
-    private static final Config config = new Config();
-    private static final LoggerController log = new LoggerController();
-    private static final FileController fileControl = new FileController();
-    private static final PatternMatcher patternMatcher = new PatternMatcher();
+    private final Config config = new Config();
+    private final LoggerController log = new LoggerController();
+    private final FileController fileControl = new FileController();
+    private final PatternMatcher patternMatcher = new PatternMatcher();
+    private final PathUtil pathUtil = new PathUtil();
 
 
     public boolean createDatabase(String query){
-        // SYNTAX: CREATE DATABASE dbName
         String dbName = patternMatcher.retrieve(StatementPatterns.CreateDatabase, query, 1);
-        String path = getDbPath(dbName);
+        String path = pathUtil.getDbPath(dbName);
 
         if( path != null && fileControl.create( path, "d") ){
             log.INFO("Successfully created database: \""+dbName+"\"");
@@ -35,19 +36,15 @@ public class Statements {
         return true;
     }
 
-    /*
-     *  TODO - better param retriever
-     */
     public boolean createTable(String query){
-        // SYNTAX: CREATE TABLE (param1, param2)
         String tableName = patternMatcher.retrieve(StatementPatterns.CreateTable, query, 1);
-        String path = getTablePath(tableName);
-        if( isNullOrEmpty(path) ){
+        String path = pathUtil.getTablePath(tableName);
+        if( StringUtil.isNullOrEmpty(path) ){
             log.ERROR("Cannot create table, please select DB to use first!");
             return false;
         }
 
-        String paramsComponent = patternMatcher.retrieve(StatementPatterns.CreateTable, query, 1);
+        String paramsComponent = patternMatcher.retrieve(StatementPatterns.CreateTable, query, 2);
         ArrayList<String> params = new ArrayList<>(Arrays.asList(paramsComponent.split(",")));
         if( fileControl.create(path, "f") && fileControl.saveLineToFile(path, params)){
             log.INFO("Successfully created table: \""+tableName+"\"");
@@ -60,8 +57,8 @@ public class Statements {
 
     public boolean dropDatabase(String query){
         String dbName = patternMatcher.retrieve(StatementPatterns.DropDatabase, query, 1);
-        String path = getDbPath(dbName);
-        if( isNullOrEmpty(path) || !fileControl.exists(path) ){
+        String path = pathUtil.getDbPath(dbName);
+        if( StringUtil.isNullOrEmpty(path) || !fileControl.exists(path) ){
             log.ERROR("Cannot drop database \""+dbName+"\"! It may not exist!");
             return false;
         }
@@ -81,8 +78,8 @@ public class Statements {
 
     public boolean dropTable(String query){
         String tableName = patternMatcher.retrieve(StatementPatterns.DropTable, query, 1);
-        String path = getTablePath(tableName);
-        if( isNullOrEmpty(path) || !fileControl.exists(path) ){
+        String path = pathUtil.getTablePath(tableName);
+        if( StringUtil.isNullOrEmpty(path) || !fileControl.exists(path) ){
             log.ERROR("Cannot drop table \""+tableName+"\"! It may not exist!");
             return false;
         }
@@ -98,7 +95,7 @@ public class Statements {
 
     public boolean showDatabases(){
         String usedWorkspace = config.getUsedWorkspace();
-        if(isNullOrEmpty(usedWorkspace)){
+        if(StringUtil.isNullOrEmpty(usedWorkspace)){
             log.ERROR("Cannot show databases, no workspace active!");
             return false;
         }
@@ -122,8 +119,8 @@ public class Statements {
     }
 
     public boolean showTables(){
-        String path = getDbPath(config.getUsedDatabase());
-        if( isNullOrEmpty(path) ){
+        String path = pathUtil.getDbPath(config.getUsedDatabase());
+        if( StringUtil.isNullOrEmpty(path) ){
             log.ERROR("Cannot show tables, please select DB to use first!");
             return false;
         }
@@ -145,8 +142,8 @@ public class Statements {
 
     public boolean showTable(String query){
         String tableName = patternMatcher.retrieve(StatementPatterns.ShowTable, query, 1);
-        String path = getTablePath(tableName);
-        if( isNullOrEmpty(path) ){
+        String path = pathUtil.getTablePath(tableName);
+        if( StringUtil.isNullOrEmpty(path) ){
             log.ERROR("Cannot show table \""+tableName+"\", please select DB to use first!");
             return false;
         }
@@ -168,13 +165,13 @@ public class Statements {
 
     public boolean use(String query){
         String dbName = patternMatcher.retrieve(StatementPatterns.Use, query, 1);
-        if( isNullOrEmpty(config.getUsedWorkspace()) ){
+        if( StringUtil.isNullOrEmpty(config.getUsedWorkspace()) ){
             log.ERROR("Workspace field is empty!");
             return false;
         }
 
-        String path = getDbPath(dbName);
-        if (!isNullOrEmpty(path) && fileControl.exists(path)) {
+        String path = pathUtil.getDbPath(dbName);
+        if (!StringUtil.isNullOrEmpty(path) && fileControl.exists(path)) {
             config.setUsedDatabase(dbName);
             log.INFO("Using database \"" + dbName + "\"");
         } else {
@@ -194,8 +191,8 @@ public class Statements {
         String headersToGetComponent = patternMatcher.retrieve(StatementPatterns.Select, query, 1);
         String tableName = patternMatcher.retrieve(StatementPatterns.Select, query, 3);
 
-        String path = getTablePath(tableName);
-        if( isNullOrEmpty(path) || !fileControl.exists(path) ) {
+        String path = pathUtil.getTablePath(tableName);
+        if( StringUtil.isNullOrEmpty(path) || !fileControl.exists(path) ) {
             log.ERROR("Could not select data from table \""+tableName+"\", because it does not exist!");
             return false;
         }
@@ -220,7 +217,7 @@ public class Statements {
         sb.delete(sb.lastIndexOf(Config.Constants.SELECT_DATA_SEPARATOR), sb.length()).append("\n       ");
 
         ArrayList<HashMap<String, String>> data = fileControl.readData(path, headersToGet);
-        if(query.toUpperCase().matches("^.* WHERE \\w+ ?(>|>=|==|<=|<|!=) ?.+;?$")) {
+        if(query.toUpperCase().matches("^.* WHERE \\w+ ?(==|!=) ?.+;?$")) {
             data = where(fileControl.readData(path), query);
         }
 
@@ -240,8 +237,8 @@ public class Statements {
         ArrayList<String> headers = new ArrayList<String>(Arrays.asList( patternMatcher.retrieve(StatementPatterns.Insert, query, 2).split(",")));
         ArrayList<String> data = new ArrayList<String>(Arrays.asList( patternMatcher.retrieve(StatementPatterns.Insert, query, 4).split(",")));
 
-        String path = getTablePath(tableName);
-        if( isNullOrEmpty(path) || !fileControl.exists(path)){
+        String path = pathUtil.getTablePath(tableName);
+        if( StringUtil.isNullOrEmpty(path) || !fileControl.exists(path)){
             log.ERROR("Could not insert data into table \""+tableName+"\". Table does not exist!");
             return false;
         } else if( headers.size() != data.size() ){
@@ -265,14 +262,11 @@ public class Statements {
         return true;
     }
 
-    /*
-     * TODO Don't really know how to refactor condition part
-     */
     public boolean update(String query){
         String tableName = patternMatcher.retrieve(StatementPatterns.Update, query,1);
-        String path = getTablePath(tableName);
+        String path = pathUtil.getTablePath(tableName);
 
-        if( isNullOrEmpty(path) || !fileControl.exists(path) ){
+        if( StringUtil.isNullOrEmpty(path) || !fileControl.exists(path) ){
             log.ERROR("Table does not exist");
             return false;
         }
@@ -285,15 +279,15 @@ public class Statements {
         }
 
         String conditionPart = query.split("WHERE|where")[1];
-        String headerWhere = conditionPart.trim().split("(>|>=|==|<=|<|!=)")[0].trim();
-        String operator = patternMatcher.retrieve("(>|>=|==|<=|<|!=)", conditionPart);
-        String value = conditionPart.trim().split("(>|>=|==|<=|<|!=)")[1].trim();
+        String headerWhere = conditionPart.trim().split("(==|!=)")[0].trim();
+        String operator = patternMatcher.retrieve("(==|!=)", conditionPart);
+        String value = conditionPart.trim().split("(==|!=)")[1].trim();
 
         ArrayList<String> headers = fileControl.readHeader(path);
         ArrayList<HashMap<String, String>> data = fileControl.readData(path);
 
-        if( isNullOrEmpty(headerWhere) || isNullOrEmpty(operator) ||
-            isNullOrEmpty(value) || headers == null || data == null) {
+        if( StringUtil.isNullOrEmpty(headerWhere) || StringUtil.isNullOrEmpty(operator) ||
+            StringUtil.isNullOrEmpty(value) || headers == null || data == null) {
             return false;
         }
 
@@ -307,27 +301,24 @@ public class Statements {
         return fileControl.insertAllData(path, data, headers);
     }
 
-    /*
-     * TODO Don't really know how to refactor condition part
-     */
     public boolean delete(String query){
         String tableName = patternMatcher.retrieve(StatementPatterns.Delete, query, 1);
-        String path = getTablePath(tableName);
-        if( isNullOrEmpty(path) || !fileControl.exists(path) ){
+        String path = pathUtil.getTablePath(tableName);
+        if( StringUtil.isNullOrEmpty(path) || !fileControl.exists(path) ){
             log.ERROR("Table does not exist");
             return false;
         }
 
         String conditionPart = query.split("WHERE|where")[1];
-        String headerWhere = conditionPart.trim().split("(>|>=|==|<=|<|!=)")[0].trim();
-        String operator = patternMatcher.retrieve("(>|>=|==|<=|<|!=)", conditionPart);
-        String value = conditionPart.trim().split("(>|>=|==|<=|<|!=)")[1].trim();
+        String headerWhere = conditionPart.trim().split("(==|!=)")[0].trim();
+        String operator = patternMatcher.retrieve("(==|!=)", conditionPart);
+        String value = conditionPart.trim().split("(==|!=)")[1].trim();
 
         ArrayList<String> headers = fileControl.readHeader(path);
         ArrayList<HashMap<String, String>> data = fileControl.readData(path);
 
-        if( isNullOrEmpty(headerWhere) || isNullOrEmpty(operator) ||
-                isNullOrEmpty(value) || headers == null || data == null) {
+        if( StringUtil.isNullOrEmpty(headerWhere) || StringUtil.isNullOrEmpty(operator) ||
+                StringUtil.isNullOrEmpty(value) || headers == null || data == null) {
             return false;
         }
 
@@ -348,30 +339,19 @@ public class Statements {
     /*
      *  HELPER FUNCTIONS
      */
-
-    private String getTablePath(String tName){
-        if( tName == null || config.getUsedDatabase() == null ) return null;
-        return getDbPath(config.getUsedDatabase()).concat("/".concat(tName).concat(".txt"));
-    }
-
-    private String getDbPath(String dbName){
-        if( dbName == null  || config.getUsedWorkspace() == null ) return null;
-        return config.getUsedWorkspace().concat(dbName);
-    }
-
     private ArrayList<HashMap<String, String>> where(ArrayList<HashMap<String, String>> allData, String query){
         ArrayList<HashMap<String, String>> result = new ArrayList<>();
         String conditionPart = query.split("WHERE|where")[1];
-        String header = conditionPart.trim().split("(>|>=|==|<=|<|!=)")[0].trim();
+        String header = conditionPart.trim().split("(==|!=)")[0].trim();
         String operator = patternMatcher.retrieve("(>|>=|==|<=|<|!=)", conditionPart);
-        String value = conditionPart.trim().split("(>|>=|==|<=|<|!=)")[1].trim();
+        String value = conditionPart.trim().split("(==|!=)")[1].trim();
 
         log.DEBUG("Entering where clause");
         if( !allData.get(0).containsKey(header) ){
             log.ERROR("Table does not contain field \""+header+"\"!");
             return result;
-        } else if ( isNullOrEmpty(conditionPart) || isNullOrEmpty(header) ||
-                    isNullOrEmpty(operator) || isNullOrEmpty(value) ){
+        } else if ( StringUtil.isNullOrEmpty(conditionPart) || StringUtil.isNullOrEmpty(header) ||
+                    StringUtil.isNullOrEmpty(operator) || StringUtil.isNullOrEmpty(value) ){
             log.ERROR("Missing data in WHERE clause !");
             return result;
         }
@@ -385,35 +365,16 @@ public class Statements {
         return result;
     }
 
-    // TODO clean this up, rework it
     private boolean fulfillsCondition(String leftValue, String operator, String rightValue){
-        boolean isNumeric;
-        Integer number = null;
-        try{
-            number = Integer.parseInt(leftValue);
-            isNumeric = true;
-        } catch( Exception ex ){
-            isNumeric = false;
-        }
 
-        if( (">".equals(operator) || ">=".equals(operator)) && isNumeric ){
-            // TODO
-        }
-        if( ">=".equals(operator) || "==".equals(operator) || "<=".equals(operator) ){
+        if( "==".equals(operator) ){
             return leftValue.equals(rightValue);
-        }
-        if( "<=".equals(operator) || "<".equals(operator) ){
-            // TODO
         }
         if( "!=".equals(operator) ){
             return !leftValue.equals(rightValue);
         }
 
         return false;
-    }
-
-    private boolean isNullOrEmpty(String s){
-        return s == null || "".equals(s);
     }
 
 }

@@ -3,7 +3,6 @@ package my.labproject.controllers;
 import my.labproject.Config;
 import my.labproject.Config.Constants;
 import my.labproject.utils.CommandMatcher;
-import my.labproject.utils.Statements;
 
 public class DatabaseController {
 
@@ -11,7 +10,7 @@ public class DatabaseController {
     private final LoggerController log = new LoggerController();
     private final FileController fileControl = new FileController();
     private final CommandMatcher commandMatcher = new CommandMatcher();
-    private final Statements statements = new Statements();
+    private final StatementsController statements = new StatementsController();
     private String workspace;
 
 

@@ -14,7 +14,6 @@ public class PatternMatcher {
         return m.matches();
     }
 
-    // TODO
     public String retrieve(String pattern, String query){
         return retrieve(Pattern.compile(pattern), query, 1);
     }
@@ -22,11 +21,6 @@ public class PatternMatcher {
     public String retrieve(Pattern pattern, String query, Integer position){
         Matcher m = pattern.matcher(query);
         return m.find() ? m.group(position) : null;
-    }
-
-    public Integer getGroupsCount(Pattern pattern, String query){
-        Matcher m = pattern.matcher(query);
-        return m.groupCount();
     }
 
 }

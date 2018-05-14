@@ -2,6 +2,7 @@ package my.labproject.utils;
 
 import my.labproject.Config;
 import my.labproject.controllers.LoggerController;
+import my.labproject.controllers.StatementsController;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -13,7 +14,7 @@ public class CommandMatcher {
     private PatternMatcher patternMatcher = new PatternMatcher();
     private LoggerController log = new LoggerController();
 
-    public boolean matchesAnyAvailable(String query, Statements statements){
+    public boolean matchesAnyAvailable(String query, StatementsController statements){
         try {
             Field[] patterns = Config.StatementPatterns.class.getDeclaredFields();
             for (Field pattern : patterns) {
@@ -29,7 +30,7 @@ public class CommandMatcher {
         return false;
     }
 
-    private boolean executeMethod(String methodName, Statements statements, String query){
+    private boolean executeMethod(String methodName, StatementsController statements, String query){
         boolean result;
         boolean paramsPresent = false;
 
@@ -37,7 +38,7 @@ public class CommandMatcher {
             return false;
         }
 
-        for( Method m : Statements.class.getDeclaredMethods() ){
+        for( Method m : StatementsController.class.getDeclaredMethods() ){
             if( m.getName().equals(methodName) ){
                 if( m.getGenericParameterTypes().length > 0 ){
                     paramsPresent = true;
@@ -48,10 +49,10 @@ public class CommandMatcher {
         try {
             Method methodToDo;
             if( paramsPresent ){
-                methodToDo = Statements.class.getDeclaredMethod(methodName, String.class);
+                methodToDo = StatementsController.class.getDeclaredMethod(methodName, String.class);
                 result = (boolean) methodToDo.invoke(statements, query);
             } else {
-                methodToDo = Statements.class.getDeclaredMethod(methodName);
+                methodToDo = StatementsController.class.getDeclaredMethod(methodName);
                 result = (boolean) methodToDo.invoke(statements);
             }
 
