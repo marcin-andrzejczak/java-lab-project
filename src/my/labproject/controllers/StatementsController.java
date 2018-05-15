@@ -246,9 +246,20 @@ public class StatementsController {
             return false;
         }
 
+
         HashMap<String, String> dataSet = new HashMap<>();
         for ( String header : headers ){
             dataSet.put( header.trim(), data.get(headers.indexOf(header)).trim() );
+        }
+
+        ArrayList<HashMap<String, String>> dataInTable =  fileControl.readData(path);
+        for(HashMap<String, String> row : dataInTable){
+            for(String header : headers){
+                if( row.get(header).equals(dataSet.get(header)) ){
+                    log.ERROR("Could not insert data! Such row already exists!");
+                    return true;
+                }
+            }
         }
 
         log.DEBUG("Inserting data into table \""+tableName+"\".");
